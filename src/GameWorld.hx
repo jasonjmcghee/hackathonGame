@@ -17,7 +17,7 @@ class GameWorld extends World {
   }
 
   public override function begin() {
-    hero = new Hero(30, 50);
+    hero = new Hero(50, 50);
     add(hero);
 
     for (i in 0...20) {
@@ -35,11 +35,10 @@ class GameWorld extends World {
         add(new Wall(13+i,8-i));
     }
   }
-/*
+
   public override function update() {
-    super.update();
     HXP.camera.x = hero.x - HXP.halfWidth;
     HXP.camera.y = hero.y - HXP.halfHeight;
+    super.update();
   }
-*/
 }

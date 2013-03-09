@@ -1034,8 +1034,13 @@ $hxClasses["GameWorld"] = GameWorld;
 GameWorld.__name__ = ["GameWorld"];
 GameWorld.__super__ = com.haxepunk.World;
 GameWorld.prototype = $extend(com.haxepunk.World.prototype,{
-	begin: function() {
-		this.hero = new entities.Hero(30,50);
+	update: function() {
+		com.haxepunk.HXP.camera.x = this.hero.x - com.haxepunk.HXP.halfWidth;
+		com.haxepunk.HXP.camera.y = this.hero.y - com.haxepunk.HXP.halfHeight;
+		com.haxepunk.World.prototype.update.call(this);
+	}
+	,begin: function() {
+		this.hero = new entities.Hero(50,50);
 		this.add(this.hero);
 		var _g = 0;
 		while(_g < 20) {
@@ -14311,8 +14316,8 @@ com.haxepunk.utils.Key.nameOfKey = function($char) {
 	return String.fromCharCode($char);
 }
 var entities = {}
-entities.Hero = function(x,y) {
-	com.haxepunk.Entity.call(this,x,y);
+entities.Hero = function(posX,posY) {
+	com.haxepunk.Entity.call(this,posX,posY);
 	this.setGraphic(new com.haxepunk.graphics.Image("gfx/block.png"));
 	{
 		this.width = 32;
@@ -14329,19 +14334,18 @@ entities.Hero.prototype = $extend(com.haxepunk.Entity.prototype,{
 		this.xVel += this.xAccel * 3;
 		this.yVel += this.yAccel * 3;
 		var pab = Math.sqrt(Math.pow(this.xVel,2) + Math.pow(this.yVel,2));
-		if(this.xVel != 0 && this.yVel != 0) {
-			if(pab > 8) {
-				this.xVel = 8 * (this.xVel / pab);
-				this.yVel = 8 * (this.yVel / pab);
-			}
-		} else if(this.xVel == 0 && Math.abs(this.yVel) > 8) this.yVel = 8 * com.haxepunk.HXP.sign(this.yVel); else if(this.yVel == 0 && Math.abs(this.xVel) > 8) this.xVel = 8 * com.haxepunk.HXP.sign(this.xVel);
+		var normalized = 8 / pab;
+		if(pab > 8) {
+			this.xVel *= normalized;
+			this.yVel *= normalized;
+		}
 		if(this.xVel < 0) this.xVel = Math.min(this.xVel + 0.4,0); else if(this.xVel > 0) this.xVel = Math.max(this.xVel - 0.4,0);
 		if(this.yVel < 0) this.yVel = Math.min(this.yVel + 0.4,0); else if(this.yVel > 0) this.yVel = Math.max(this.yVel - 0.4,0);
-		this.moveBy(this.xVel,this.yVel);
 	}
 	,update: function() {
 		this.handleInput();
 		this.move();
+		this.moveBy(this.xVel,this.yVel);
 		com.haxepunk.Entity.prototype.update.call(this);
 	}
 	,handleInput: function() {

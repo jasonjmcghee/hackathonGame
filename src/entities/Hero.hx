@@ -5,6 +5,7 @@ import com.haxepunk.graphics.Image;
 import com.haxepunk.utils.Input;
 import com.haxepunk.utils.Key;
 import com.haxepunk.HXP;
+import entities.Wall;
 
 class Hero extends Entity {
   
@@ -16,8 +17,8 @@ class Hero extends Entity {
   private static inline var speed:Float = 3;
   private static inline var drag:Float = 0.4;
 
-  public function new(x:Int, y:Int) {
-    super(x, y);
+  public function new(posX:Int, posY:Int) {
+    super(posX, posY);
     graphic = new Image("gfx/block.png");
     setHitbox(32, 32);
   }
@@ -34,41 +35,37 @@ class Hero extends Entity {
   public override function update() {
   
       handleInput();
-      move();
+      //if (collide("wall", x, y) != null) {
+        move();
+        moveBy(xVel, yVel);
+      //}
       super.update();
   }
 
   private function move() {
-
-      xVel += xAccel * speed;
-      yVel += yAccel * speed;
-
-      var pab:Float = Math.sqrt(Math.pow(xVel, 2) + Math.pow(yVel, 2));
-      var normalized:Float = pab * maxVelocity;
-    
-      if (xVel != 0 && yVel != 0) {
-          if (pab > maxVelocity) {
-              xVel *= normalized;
-              yVel *= normalized;
-          }
-      } else if (xVel == 0 && Math.abs(yVel) > maxVelocity) {
-          yVel = maxVelocity * HXP.sign(yVel);
-      } else if (yVel == 0 && Math.abs(xVel) > maxVelocity) {
-          xVel = maxVelocity * HXP.sign(xVel);
-      }
-
-      if (xVel < 0) {
-          xVel = Math.min(xVel + drag, 0);
-      } else if (xVel > 0) {
-          xVel = Math.max(xVel - drag, 0);
-      }
       
-      if (yVel < 0) {
-          yVel = Math.min(yVel + drag, 0);
-      } else if (yVel > 0) {
-          yVel = Math.max(yVel - drag, 0);
-      }
+    xVel += xAccel * speed;
+    yVel += yAccel * speed;
 
-      moveBy(xVel, yVel);
+    var pab:Float = Math.sqrt(Math.pow(xVel, 2) + Math.pow(yVel, 2));
+    var normalized:Float = maxVelocity / pab;
+  
+    if (pab > maxVelocity) {
+        xVel *= normalized;
+        yVel *= normalized;
+    }
+
+    if (xVel < 0) {
+        xVel = Math.min(xVel + drag, 0);
+    } else if (xVel > 0) {
+        xVel = Math.max(xVel - drag, 0);
+    }
+    
+    if (yVel < 0) {
+        yVel = Math.min(yVel + drag, 0);
+    } else if (yVel > 0) {
+        yVel = Math.max(yVel - drag, 0);
+    }
+
   }
 }
