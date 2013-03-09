@@ -13,12 +13,14 @@ class Timer extends Entity {
     super();
     time = 0;
     graphic = new Text('Time Alive: ' + time + ' seconds');
+    graphic.scale = 2;
   }
 
   public override function update() {
     
     super.update();
-    time = Math.floor(HXP.timeFlag()*1000.0);
+    time += Math.floor(HXP.timeFlag()*1000.0);
+    graphic.text('Time Alive: ' + time + ' seconds');
   }
 
   public function getTime():Int {

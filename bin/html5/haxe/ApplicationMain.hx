@@ -88,6 +88,11 @@ class ApplicationMain {
 		
 		
 		var loader:Loader = new Loader ();
+		loaders.set ("gfx/lava.png", loader);
+		total ++;
+		
+		
+		var loader:Loader = new Loader ();
 		loaders.set ("gfx/floor.png", loader);
 		total ++;
 		
@@ -196,6 +201,12 @@ class ApplicationMain {
 			
 		}
 		
+		if (inName=="gfx/lava.png") {
+			
+			return Assets.getBitmapData ("gfx/lava.png");
+			
+		}
+		
 		if (inName=="gfx/floor.png") {
 			
 			return Assets.getBitmapData ("gfx/floor.png");
@@ -282,6 +293,8 @@ class ApplicationMain {
 
 	
 		class NME_font_04b_03___ttf extends nme.text.Font { }
+	
+
 	
 
 	

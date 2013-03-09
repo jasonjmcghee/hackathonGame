@@ -8,6 +8,7 @@ import com.haxepunk.HXP;
 import entities.Floor;
 import entities.Hero;
 import entities.Wall;
+import entities.Honey;
 import entities.Blob;
 import entities.Timer;
 
@@ -44,28 +45,31 @@ class GameWorld extends World {
     for (i in 22...24) add(new Wall(i, 18));
     for (i in 1...4) add(new Wall(25, i));
     for (i in 15...19) add(new Wall(i, 22));
-
     */
 
+
     // Naive generation
-    for (i in 0...worldWidth) {
-      for (j in 0...worldHeight) {
-        if (Math.random() < 0.05) {
-          add(new Wall(i, j));
-          if (Math.random() < 0.1) {
-            add(new Wall(i, j));
+    for (i in 0...Math.floor(worldWidth)) {
+      for (j in 0...Math.floor(worldHeight)) {
+        if (!(i > worldWidth / 3 && j < Math.floor(worldWidth / 3) ||
+        i < 2 * worldWidth / 3 && j > Math.floor(2* worldWidth / 3))) {
+          if (Math.random() < 0.05) {
+            add(new Honey(i, j));
             if (Math.random() < 0.1) {
-              add(new Wall(i, j));
+              add(new Honey(i, j));
+              if (Math.random() < 0.1) {
+                add(new Honey(i, j));
+              }
             }
-          }
-        } 
+          } 
+        }
       }
     }
 
     //Floor
     //add(new Floor());
 
-    hero = new Hero(50, 50);
+    hero = new Hero(550, 100);
     add(hero);
 
     for (i in 0...10) add(new Blob(400, 250, hero));
@@ -87,6 +91,8 @@ class GameWorld extends World {
     } else {
       gameOver();
     }
+    timer.x = HXP.camera.x + 10;
+    timer.y = HXP.camera.y + 10;
     super.update();
   }
 
