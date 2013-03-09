@@ -4,8 +4,8 @@
 
  	<app file="Main" main="Main" path="bin" />
 
-	<window fps="30" orientation="portrait" background="0x333333" />
-	<window width="640" height="480" resizable="true" unless="mobile" />
+	<window fps="60" orientation="portrait" background="0x333333" />
+	<window width="800" height="550" resizable="true" unless="mobile" />
 	<window fullscreen="true" if="mobile" />
 
 	<source path="src" />

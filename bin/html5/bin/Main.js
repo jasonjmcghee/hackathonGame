@@ -2913,11 +2913,11 @@ NMEPreloader.prototype = $extend(browser.display.Sprite.prototype,{
 	,onInit: function() {
 	}
 	,getWidth: function() {
-		var width = 640;
+		var width = 800;
 		if(width > 0) return width; else return nme.Lib.get_current().get_stage().get_stageWidth();
 	}
 	,getHeight: function() {
-		var height = 480;
+		var height = 550;
 		if(height > 0) return height; else return nme.Lib.get_current().get_stage().get_stageHeight();
 	}
 	,getBackgroundColor: function() {
@@ -14331,11 +14331,11 @@ entities.Hero.__name__ = ["entities","Hero"];
 entities.Hero.__super__ = com.haxepunk.Entity;
 entities.Hero.prototype = $extend(com.haxepunk.Entity.prototype,{
 	move: function() {
-		this.xVel += this.xAccel * 3;
-		this.yVel += this.yAccel * 3;
+		this.xVel += this.xAccel * 4;
+		this.yVel += this.yAccel * 4;
 		var pab = Math.sqrt(Math.pow(this.xVel,2) + Math.pow(this.yVel,2));
-		var normalized = 8 / pab;
-		if(pab > 8) {
+		var normalized = 10 / pab;
+		if(pab > 10) {
 			this.xVel *= normalized;
 			this.yVel *= normalized;
 		}
@@ -14343,10 +14343,14 @@ entities.Hero.prototype = $extend(com.haxepunk.Entity.prototype,{
 		if(this.yVel < 0) this.yVel = Math.min(this.yVel + 0.4,0); else if(this.yVel > 0) this.yVel = Math.max(this.yVel - 0.4,0);
 	}
 	,update: function() {
+		com.haxepunk.Entity.prototype.update.call(this);
 		this.handleInput();
 		this.move();
 		this.moveBy(this.xVel,this.yVel);
-		com.haxepunk.Entity.prototype.update.call(this);
+		if(this.collide("wall",this.x,this.y) != null) {
+			this.xVel *= -1;
+			this.yVel *= -1;
+		}
 	}
 	,handleInput: function() {
 		this.xAccel = 0;
@@ -17025,8 +17029,8 @@ com.haxepunk.utils.Key.NUMPAD_DIVIDE = 111;
 com.haxepunk.utils.Key.NUMPAD_ENTER = 108;
 com.haxepunk.utils.Key.NUMPAD_MULTIPLY = 106;
 com.haxepunk.utils.Key.NUMPAD_SUBTRACT = 109;
-entities.Hero.maxVelocity = 8;
-entities.Hero.speed = 3;
+entities.Hero.maxVelocity = 10;
+entities.Hero.speed = 4;
 entities.Hero.drag = 0.4;
 haxe.Template.splitter = new EReg("(::[A-Za-z0-9_ ()&|!+=/><*.\"-]+::|\\$\\$([A-Za-z0-9_-]+)\\()","");
 haxe.Template.expr_splitter = new EReg("(\\(|\\)|[ \r\n\t]*\"[^\"]*\"[ \r\n\t]*|[!+=/><*.&|-]+)","");
