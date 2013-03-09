@@ -97,8 +97,8 @@ class Assets {
 			resourceTypes.set ("font/04B_03__.ttf", "font");
 			
 			
-			resourceNames.set ("atlas/tiles.xml", "atlas/tiles.xml");
-			resourceTypes.set ("atlas/tiles.xml", "text");
+			resourceNames.set ("atlas/tilemap.xml", "atlas/tilemap.xml");
+			resourceTypes.set ("atlas/tilemap.xml", "text");
 			
 			
 			initialized = true;

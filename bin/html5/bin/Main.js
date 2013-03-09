@@ -56,7 +56,7 @@ ApplicationMain.main = function() {
 	ApplicationMain.total++;
 	var urlLoader = new browser.net.URLLoader();
 	urlLoader.dataFormat = browser.net.URLLoaderDataFormat.TEXT;
-	ApplicationMain.urlLoaders.set("atlas/tiles.xml",urlLoader);
+	ApplicationMain.urlLoaders.set("atlas/tilemap.xml",urlLoader);
 	ApplicationMain.total++;
 	if(ApplicationMain.total == 0) ApplicationMain.begin(); else {
 		var $it0 = ApplicationMain.loaders.keys();
@@ -93,7 +93,7 @@ ApplicationMain.getAsset = function(inName) {
 	if(inName == "gfx/floor.png") return nme.installer.Assets.getBitmapData("gfx/floor.png");
 	if(inName == "gfx/wall.png") return nme.installer.Assets.getBitmapData("gfx/wall.png");
 	if(inName == "font/04B_03__.ttf") return nme.installer.Assets.getFont("font/04B_03__.ttf");
-	if(inName == "atlas/tiles.xml") return nme.installer.Assets.getText("atlas/tiles.xml");
+	if(inName == "atlas/tilemap.xml") return nme.installer.Assets.getText("atlas/tilemap.xml");
 	return null;
 }
 ApplicationMain.loader_onComplete = function(event) {
@@ -1034,7 +1034,7 @@ com.haxepunk.World.prototype = $extend(com.haxepunk.Tweener.prototype,{
 });
 var GameWorld = function() {
 	com.haxepunk.World.call(this);
-	this.atlas = com.haxepunk.graphics.atlas.TextureAtlas.loadTexturePacker("atlas/tiles.xml");
+	this.atlas = com.haxepunk.graphics.atlas.TextureAtlas.loadTexturePacker("atlas/tilemap.xml");
 };
 $hxClasses["GameWorld"] = GameWorld;
 GameWorld.__name__ = ["GameWorld"];
@@ -16312,8 +16312,8 @@ nme.installer.Assets.initialize = function() {
 		nme.installer.Assets.resourceClasses.set("font/04B_03__.ttf",NME_font_5);
 		nme.installer.Assets.resourceNames.set("font/04B_03__.ttf","font/04B_03__.ttf");
 		nme.installer.Assets.resourceTypes.set("font/04B_03__.ttf","font");
-		nme.installer.Assets.resourceNames.set("atlas/tiles.xml","atlas/tiles.xml");
-		nme.installer.Assets.resourceTypes.set("atlas/tiles.xml","text");
+		nme.installer.Assets.resourceNames.set("atlas/tilemap.xml","atlas/tilemap.xml");
+		nme.installer.Assets.resourceTypes.set("atlas/tilemap.xml","text");
 		nme.installer.Assets.initialized = true;
 	}
 }

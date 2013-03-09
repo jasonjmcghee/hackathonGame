@@ -100,7 +100,7 @@ class ApplicationMain {
 		
 		var urlLoader:URLLoader = new URLLoader ();
 		urlLoader.dataFormat = TEXT;
-		urlLoaders.set ("atlas/tiles.xml", urlLoader);
+		urlLoaders.set ("atlas/tilemap.xml", urlLoader);
 		total ++;
 		
 		
@@ -220,9 +220,9 @@ class ApplicationMain {
 			
 		}
 		
-		if (inName=="atlas/tiles.xml") {
+		if (inName=="atlas/tilemap.xml") {
 			
-			return Assets.getText ("atlas/tiles.xml");
+			return Assets.getText ("atlas/tilemap.xml");
 			
 		}
 		
