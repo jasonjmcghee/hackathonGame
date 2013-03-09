@@ -5,7 +5,6 @@ import com.haxepunk.graphics.Backdrop;
 import com.haxepunk.masks.Grid;
 import com.haxepunk.Entity;
 import com.haxepunk.HXP;
-import entities.Floor;
 import entities.Hero;
 import entities.Wall;
 import entities.Honey;
@@ -64,9 +63,6 @@ class GameWorld extends World {
         }
       }
     }
-
-    //Floor
-    //add(new Floor());
 
     hero = new Hero(550, 100);
     add(hero);

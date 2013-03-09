@@ -38,13 +38,6 @@ class Blob extends Entity {
       xAccel = 0;
       yAccel = 0;
 
-      if (Input.mouseDown) {
-        if (HXP.world.mouseY > y) yAccel = 1;
-        if (HXP.world.mouseX > x) xAccel = 1;
-        if (HXP.world.mouseY < y) yAccel = -1;
-        if (HXP.world.mouseX < x) xAccel = -1;
-      }
-
       if (enemy.y > y) yAccel = 1;
       if (enemy.x > x) xAccel = 1;
       if (enemy.y < y) yAccel = -1;
@@ -55,7 +48,7 @@ class Blob extends Entity {
       super.update();
 
       handleInput();
-      if (collide("wall", x + (HXP.sign(xVel)*2), y + (HXP.sign(yVel)*4)) != null) {
+      if (collide("wall", x + (HXP.sign(xVel)*2), y + (HXP.sign(yVel)*2)) != null) {
         x -= HXP.sign(xVel);
         y -= HXP.sign(yVel);
         xVel *= -1;
@@ -93,5 +86,11 @@ class Blob extends Entity {
 
   public function getMoveDist():Float {
     return Math.sqrt(Math.pow(xVel, 2) + Math.pow(yVel, 2));
+  }
+
+  public function levelUp() {
+    speed += 1;
+    maxVelocity += 1;
+    drag *= 0.9;
   }
 }

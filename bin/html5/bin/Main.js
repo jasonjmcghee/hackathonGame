@@ -14557,7 +14557,12 @@ $hxClasses["entities.Blob"] = entities.Blob;
 entities.Blob.__name__ = ["entities","Blob"];
 entities.Blob.__super__ = com.haxepunk.Entity;
 entities.Blob.prototype = $extend(com.haxepunk.Entity.prototype,{
-	getMoveDist: function() {
+	levelUp: function() {
+		this.speed += 1;
+		this.maxVelocity += 1;
+		this.drag *= 0.9;
+	}
+	,getMoveDist: function() {
 		return Math.sqrt(Math.pow(this.xVel,2) + Math.pow(this.yVel,2));
 	}
 	,move: function() {
@@ -14576,7 +14581,7 @@ entities.Blob.prototype = $extend(com.haxepunk.Entity.prototype,{
 	,update: function() {
 		com.haxepunk.Entity.prototype.update.call(this);
 		this.handleInput();
-		if(this.collide("wall",this.x + com.haxepunk.HXP.sign(this.xVel) * 2,this.y + com.haxepunk.HXP.sign(this.yVel) * 4) != null) {
+		if(this.collide("wall",this.x + com.haxepunk.HXP.sign(this.xVel) * 2,this.y + com.haxepunk.HXP.sign(this.yVel) * 2) != null) {
 			this.x -= com.haxepunk.HXP.sign(this.xVel);
 			this.y -= com.haxepunk.HXP.sign(this.yVel);
 			this.xVel *= -1;
@@ -14587,12 +14592,6 @@ entities.Blob.prototype = $extend(com.haxepunk.Entity.prototype,{
 	,handleInput: function() {
 		this.xAccel = 0;
 		this.yAccel = 0;
-		if(com.haxepunk.utils.Input.mouseDown) {
-			if((com.haxepunk.HXP.screen.getMouseY() + com.haxepunk.HXP.camera.y | 0) > this.y) this.yAccel = 1;
-			if((com.haxepunk.HXP.screen.getMouseX() + com.haxepunk.HXP.camera.x | 0) > this.x) this.xAccel = 1;
-			if((com.haxepunk.HXP.screen.getMouseY() + com.haxepunk.HXP.camera.y | 0) < this.y) this.yAccel = -1;
-			if((com.haxepunk.HXP.screen.getMouseX() + com.haxepunk.HXP.camera.x | 0) < this.x) this.xAccel = -1;
-		}
 		if(this.enemy.y > this.y) this.yAccel = 1;
 		if(this.enemy.x > this.x) this.xAccel = 1;
 		if(this.enemy.y < this.y) this.yAccel = -1;
@@ -14607,22 +14606,6 @@ entities.Blob.prototype = $extend(com.haxepunk.Entity.prototype,{
 	,yVel: null
 	,xVel: null
 	,__class__: entities.Blob
-});
-entities.Floor = function() {
-	com.haxepunk.Entity.call(this);
-	var _tiles = new com.haxepunk.graphics.Tilemap("gfx/tileset.png",64,32,32,32);
-	_tiles.setTile(0,0);
-	var _bitmapData = new browser.display.BitmapData(_tiles.getWidth(),_tiles.getHeight(),true,16777215);
-	_tiles.render(_bitmapData,new browser.geom.Point(0,0),com.haxepunk.HXP.camera.clone());
-	var _backdrop = new com.haxepunk.graphics.Backdrop(_bitmapData);
-	_backdrop.scrollX = _backdrop.scrollY = .5;
-	this.setGraphic(_backdrop);
-};
-$hxClasses["entities.Floor"] = entities.Floor;
-entities.Floor.__name__ = ["entities","Floor"];
-entities.Floor.__super__ = com.haxepunk.Entity;
-entities.Floor.prototype = $extend(com.haxepunk.Entity.prototype,{
-	__class__: entities.Floor
 });
 entities.Hero = function(posX,posY) {
 	this.isDead = false;
