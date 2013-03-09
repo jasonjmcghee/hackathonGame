@@ -1,0 +1,20 @@
+-main ApplicationMain 
+-lib nme
+-lib HaxePunk
+-cp src
+-cp /usr/lib/haxe/lib/nme/3,5,5/
+-cp /usr/lib/haxe/lib/HaxePunk/2,0,3/
+-D nme_install_tool
+-D APP_COMPANY
+-D html5
+-D web
+-resource /usr/lib/haxe/lib/HaxePunk/2,0,3/assets/font/04B_03__.ttf.hash@NME_font_04b_03___ttf
+-resource /home/jmcghee/hackathon/HackGame/assets/font/04B_03__.ttf.hash@NME_font_5
+-js bin/html5/bin/Main.js
+-cp bin/html5/haxe
+-D html5
+-D html
+--remap flash:nme
+--remap native:browser
+-debug
+--js-modern
