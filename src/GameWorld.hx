@@ -42,7 +42,7 @@ class GameWorld extends World {
 		var mapHeight:Int = map.length;
 
 		// Create tilemap
-		var tilemap:Tilemap = new Tilemap("gfx/tileset.png", mapWidth * 32, mapHeight * 32, 32, 32);
+		var tilemap:Tilemap = new Tilemap("gfx/floor.png", mapWidth * 32, mapHeight * 32, 32, 32);
 		// Create grid mask
 		var grid:Grid = new Grid(tilemap.columns * tilemap.tileWidth, tilemap.rows * tilemap.tileHeight, tilemap.tileWidth, tilemap.tileHeight);
 

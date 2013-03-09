@@ -3,12 +3,12 @@
  <tileset firstgid="1" name="tileset" tilewidth="32" tileheight="32">
   <image source="../graphics/tileset.png"/>
  </tileset>
- <layer name="Floor" width="20" height="20">
+ <layer name="floor" width="20" height="20">
   <data encoding="base64" compression="gzip">
    H4sIAAAAAAAAA+2TwQoAIAhDrf//6K7DzDnp0KGBEJmvJWZ2X6MQEwL3M150HnMjyDNexavKO72tw0OO56n9Y7XT9jsVXsbHdcY79c6zVF7VG+P5euY1EvsT3XnpRMZjfer4i2ZM5X29owXVN7odQAYAAA==
   </data>
  </layer>
- <layer name="Wall" width="20" height="20">
+ <layer name="wall" width="20" height="20">
   <properties>
    <property name="Collidable" value="True"/>
   </properties>
