@@ -11,7 +11,7 @@ oW => sprite's original width (only available if trimmed)
 oH => sprite's original height (only available if trimmed)
 r => 'y' only set if sprite is rotated
 -->
-<TextureAtlas imagePath="gfx/tilemap.png" width="64" height="32">
+<TextureAtlas imagePath="gfx/tileset.png" width="64" height="32">
     <sprite n="floor.png" x="0" y="0" w="32" h="32"/>
     <sprite n="wall.png" x="32" y="0" w="32" h="32"/>
 </TextureAtlas>
