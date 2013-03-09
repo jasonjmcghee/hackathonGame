@@ -77,12 +77,28 @@ class Assets {
 			resourceTypes.set ("font/04B_03__.ttf", "font");
 			
 			
+			resourceNames.set ("gfx/tileset.png", "gfx/tileset.png");
+			resourceTypes.set ("gfx/tileset.png", "image");
+			
+			
 			resourceNames.set ("gfx/block.png", "gfx/block.png");
 			resourceTypes.set ("gfx/block.png", "image");
+			
+			
+			resourceNames.set ("gfx/floor.png", "gfx/floor.png");
+			resourceTypes.set ("gfx/floor.png", "image");
+			
+			
+			resourceNames.set ("gfx/wall.png", "gfx/wall.png");
+			resourceTypes.set ("gfx/wall.png", "image");
 			
 			resourceClasses.set ("font/04B_03__.ttf", NME_font_5);
 			resourceNames.set ("font/04B_03__.ttf", "font/04B_03__.ttf");
 			resourceTypes.set ("font/04B_03__.ttf", "font");
+			
+			
+			resourceNames.set ("atlas/tiles.xml", "atlas/tiles.xml");
+			resourceTypes.set ("atlas/tiles.xml", "text");
 			
 			
 			initialized = true;

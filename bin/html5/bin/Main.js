@@ -43,22 +43,35 @@ ApplicationMain.main = function() {
 	ApplicationMain.loaders.set("gfx/debug/console_output.png",loader6);
 	ApplicationMain.total++;
 	var loader7 = new browser.display.Loader();
-	ApplicationMain.loaders.set("gfx/block.png",loader7);
+	ApplicationMain.loaders.set("gfx/tileset.png",loader7);
+	ApplicationMain.total++;
+	var loader8 = new browser.display.Loader();
+	ApplicationMain.loaders.set("gfx/block.png",loader8);
+	ApplicationMain.total++;
+	var loader9 = new browser.display.Loader();
+	ApplicationMain.loaders.set("gfx/floor.png",loader9);
+	ApplicationMain.total++;
+	var loader10 = new browser.display.Loader();
+	ApplicationMain.loaders.set("gfx/wall.png",loader10);
+	ApplicationMain.total++;
+	var urlLoader = new browser.net.URLLoader();
+	urlLoader.dataFormat = browser.net.URLLoaderDataFormat.TEXT;
+	ApplicationMain.urlLoaders.set("atlas/tiles.xml",urlLoader);
 	ApplicationMain.total++;
 	if(ApplicationMain.total == 0) ApplicationMain.begin(); else {
 		var $it0 = ApplicationMain.loaders.keys();
 		while( $it0.hasNext() ) {
 			var path = $it0.next();
-			var loader8 = ApplicationMain.loaders.get(path);
-			loader8.contentLoaderInfo.addEventListener("complete",ApplicationMain.loader_onComplete);
-			loader8.load(new browser.net.URLRequest(path));
+			var loader11 = ApplicationMain.loaders.get(path);
+			loader11.contentLoaderInfo.addEventListener("complete",ApplicationMain.loader_onComplete);
+			loader11.load(new browser.net.URLRequest(path));
 		}
 		var $it1 = ApplicationMain.urlLoaders.keys();
 		while( $it1.hasNext() ) {
 			var path = $it1.next();
-			var urlLoader = ApplicationMain.urlLoaders.get(path);
-			urlLoader.addEventListener("complete",ApplicationMain.loader_onComplete);
-			urlLoader.load(new browser.net.URLRequest(path));
+			var urlLoader1 = ApplicationMain.urlLoaders.get(path);
+			urlLoader1.addEventListener("complete",ApplicationMain.loader_onComplete);
+			urlLoader1.load(new browser.net.URLRequest(path));
 		}
 	}
 }
@@ -75,8 +88,12 @@ ApplicationMain.getAsset = function(inName) {
 	if(inName == "gfx/debug/console_logo.png") return nme.installer.Assets.getBitmapData("gfx/debug/console_logo.png");
 	if(inName == "gfx/debug/console_output.png") return nme.installer.Assets.getBitmapData("gfx/debug/console_output.png");
 	if(inName == "font/04B_03__.ttf") return nme.installer.Assets.getFont("font/04B_03__.ttf");
+	if(inName == "gfx/tileset.png") return nme.installer.Assets.getBitmapData("gfx/tileset.png");
 	if(inName == "gfx/block.png") return nme.installer.Assets.getBitmapData("gfx/block.png");
+	if(inName == "gfx/floor.png") return nme.installer.Assets.getBitmapData("gfx/floor.png");
+	if(inName == "gfx/wall.png") return nme.installer.Assets.getBitmapData("gfx/wall.png");
 	if(inName == "font/04B_03__.ttf") return nme.installer.Assets.getFont("font/04B_03__.ttf");
+	if(inName == "atlas/tiles.xml") return nme.installer.Assets.getText("atlas/tiles.xml");
 	return null;
 }
 ApplicationMain.loader_onComplete = function(event) {
@@ -1017,14 +1034,45 @@ com.haxepunk.World.prototype = $extend(com.haxepunk.Tweener.prototype,{
 });
 var GameWorld = function() {
 	com.haxepunk.World.call(this);
+	this.atlas = com.haxepunk.graphics.atlas.TextureAtlas.loadTexturePacker("atlas/tiles.xml");
 };
 $hxClasses["GameWorld"] = GameWorld;
 GameWorld.__name__ = ["GameWorld"];
 GameWorld.__super__ = com.haxepunk.World;
 GameWorld.prototype = $extend(com.haxepunk.World.prototype,{
-	begin: function() {
-		this.add(new entities.Hero(30,50));
+	update: function() {
+		com.haxepunk.World.prototype.update.call(this);
+		com.haxepunk.HXP.camera.x = this.hero.x - com.haxepunk.HXP.halfWidth;
+		com.haxepunk.HXP.camera.y = this.hero.y - com.haxepunk.HXP.halfHeight;
 	}
+	,begin: function() {
+		this.hero = new entities.Hero(30,50);
+		this.add(this.hero);
+		var mapWidth = GameWorld.map[0].length;
+		var mapHeight = GameWorld.map.length;
+		var tilemap = new com.haxepunk.graphics.Tilemap("gfx/floor.png",mapWidth * 32,mapHeight * 32,32,32);
+		var grid = new com.haxepunk.masks.Grid(tilemap.getColumns() * tilemap.getTileWidth(),tilemap.getRows() * tilemap.getTileHeight(),tilemap.getTileWidth(),tilemap.getTileHeight());
+		var _g1 = 0, _g = tilemap.getColumns();
+		while(_g1 < _g) {
+			var i = _g1++;
+			var _g3 = 0, _g2 = tilemap.getRows();
+			while(_g3 < _g2) {
+				var j = _g3++;
+				var tile = GameWorld.map[j][i];
+				if(tile != 0) {
+					tilemap.setTile(i,j,tile);
+					grid.setTile(i,j,true);
+				}
+			}
+		}
+		var entity = new com.haxepunk.Entity();
+		entity.setGraphic(tilemap);
+		entity.setMask(grid);
+		entity.setType("solid");
+		this.add(entity);
+	}
+	,atlas: null
+	,hero: null
 	,__class__: GameWorld
 });
 var Hash = function() {
@@ -11413,6 +11461,246 @@ com.haxepunk.debug.Console.prototype = {
 	,__properties__: {set_visible:"setVisible",get_visible:"getVisible",set_paused:"setPaused",get_paused:"getPaused",set_debug:"setDebug",get_debug:"getDebug",get_width:"getWidth",get_height:"getHeight"}
 }
 com.haxepunk.graphics = {}
+com.haxepunk.graphics.Canvas = function(width,height) {
+	this._maxHeight = 4000;
+	this._maxWidth = 4000;
+	com.haxepunk.Graphic.call(this);
+	this._color = 16777215;
+	this._alpha = 1;
+	this._graphics = com.haxepunk.HXP.sprite.get_graphics();
+	this._matrix = new browser.geom.Matrix();
+	this._rect = new browser.geom.Rectangle();
+	this._colorTransform = new browser.geom.ColorTransform();
+	this._buffers = new Array();
+	this._width = width;
+	this._height = height;
+	this._refWidth = Math.ceil(width / this._maxWidth);
+	this._refHeight = Math.ceil(height / this._maxHeight);
+	this._ref = com.haxepunk.HXP.createBitmap(this._refWidth,this._refHeight);
+	var x = 0, y = 0, w, h, i = 0, ww = this._width % this._maxWidth, hh = this._height % this._maxHeight;
+	if(ww == 0) ww = this._maxWidth;
+	if(hh == 0) hh = this._maxHeight;
+	while(y < this._refHeight) {
+		h = y < this._refHeight - 1?this._maxHeight:hh;
+		while(x < this._refWidth) {
+			w = x < this._refWidth - 1?this._maxWidth:ww;
+			this._ref.setPixel(x,y,i);
+			this._buffers[i] = com.haxepunk.HXP.createBitmap(w,h,true);
+			i++;
+			x++;
+		}
+		x = 0;
+		y++;
+	}
+};
+$hxClasses["com.haxepunk.graphics.Canvas"] = com.haxepunk.graphics.Canvas;
+com.haxepunk.graphics.Canvas.__name__ = ["com","haxepunk","graphics","Canvas"];
+com.haxepunk.graphics.Canvas.__super__ = com.haxepunk.Graphic;
+com.haxepunk.graphics.Canvas.prototype = $extend(com.haxepunk.Graphic.prototype,{
+	_graphics: null
+	,_rect: null
+	,_refHeight: null
+	,_refWidth: null
+	,_ref: null
+	,_matrix: null
+	,_colorTransform: null
+	,_tint: null
+	,_alpha: null
+	,_color: null
+	,_maxHeight: null
+	,_maxWidth: null
+	,_height: null
+	,_width: null
+	,_buffers: null
+	,getHeight: function() {
+		return this._height;
+	}
+	,height: null
+	,getWidth: function() {
+		return this._width;
+	}
+	,width: null
+	,shift: function(x,y) {
+		if(y == null) y = 0;
+		if(x == null) x = 0;
+		this.drawGraphic(x,y,this);
+	}
+	,setAlpha: function(value) {
+		if(value < 0) value = 0;
+		if(value > 1) value = 1;
+		if(this._alpha == value) return this._alpha;
+		this._alpha = value;
+		if(this._alpha == 1 && this._color == 16777215) {
+			this._tint = null;
+			return this._alpha;
+		}
+		this._tint = this._colorTransform;
+		this._tint.redMultiplier = (this._color >> 16 & 255) / 255;
+		this._tint.greenMultiplier = (this._color >> 8 & 255) / 255;
+		this._tint.blueMultiplier = (this._color & 255) / 255;
+		this._tint.alphaMultiplier = this._alpha;
+		return this._alpha;
+	}
+	,getAlpha: function() {
+		return this._alpha;
+	}
+	,alpha: null
+	,setColor: function(value) {
+		value %= 16777215;
+		if(this._color == value) return this._color;
+		this._color = value;
+		if(this._alpha == 1 && this._color == 16777215) {
+			this._tint = null;
+			return this._color;
+		}
+		this._tint = this._colorTransform;
+		this._tint.redMultiplier = (this._color >> 16 & 255) / 255;
+		this._tint.greenMultiplier = (this._color >> 8 & 255) / 255;
+		this._tint.blueMultiplier = (this._color & 255) / 255;
+		this._tint.alphaMultiplier = this._alpha;
+		return this._color;
+	}
+	,getColor: function() {
+		return this._color;
+	}
+	,color: null
+	,drawGraphic: function(x,y,source) {
+		var xx = 0, yy = 0;
+		var _g = 0, _g1 = this._buffers;
+		while(_g < _g1.length) {
+			var buffer = _g1[_g];
+			++_g;
+			this._point.x = x - xx;
+			this._point.y = y - yy;
+			source.render(buffer,this._point,com.haxepunk.HXP.zero);
+			xx += this._maxWidth;
+			if(xx >= this._width) {
+				xx = 0;
+				yy += this._maxHeight;
+			}
+		}
+	}
+	,fillTexture: function(rect,texture) {
+		var xx = 0, yy = 0;
+		var _g = 0, _g1 = this._buffers;
+		while(_g < _g1.length) {
+			var buffer = _g1[_g];
+			++_g;
+			this._graphics.clear();
+			this._graphics.beginBitmapFill(texture);
+			this._graphics.drawRect(rect.x - xx,rect.y - yy,rect.width,rect.height);
+			buffer.draw(com.haxepunk.HXP.sprite);
+			xx += this._maxWidth;
+			if(xx >= this._width) {
+				xx = 0;
+				yy += this._maxHeight;
+			}
+		}
+		this._graphics.endFill();
+	}
+	,drawRect: function(rect,color,alpha) {
+		if(alpha == null) alpha = 1;
+		if(color == null) color = 0;
+		var xx = 0, yy = 0, buffer;
+		if(alpha >= 1) {
+			this._rect.width = rect.width;
+			this._rect.height = rect.height;
+			var _g = 0, _g1 = this._buffers;
+			while(_g < _g1.length) {
+				var buffer1 = _g1[_g];
+				++_g;
+				this._rect.x = rect.x - xx;
+				this._rect.y = rect.y - yy;
+				buffer1.fillRect(this._rect,-16777216 | color);
+				xx += this._maxWidth;
+				if(xx >= this._width) {
+					xx = 0;
+					yy += this._maxHeight;
+				}
+			}
+			return;
+		}
+		var _g = 0, _g1 = this._buffers;
+		while(_g < _g1.length) {
+			var buffer1 = _g1[_g];
+			++_g;
+			this._graphics.clear();
+			this._graphics.beginFill(color,alpha);
+			this._graphics.drawRect(rect.x - xx,rect.y - yy,rect.width,rect.height);
+			buffer1.draw(com.haxepunk.HXP.sprite);
+			xx += this._maxWidth;
+			if(xx >= this._width) {
+				xx = 0;
+				yy += this._maxHeight;
+			}
+		}
+		this._graphics.endFill();
+	}
+	,fill: function(rect,color,alpha) {
+		if(alpha == null) alpha = 1;
+		if(color == null) color = 0;
+		var xx = 0, yy = 0, buffer;
+		this._rect.width = rect.width;
+		this._rect.height = rect.height;
+		if(alpha >= 1) color |= -16777216; else if(alpha <= 0) color = 0; else color = (alpha * 255 | 0) << 24 | 16777215 & color;
+		var _g = 0, _g1 = this._buffers;
+		while(_g < _g1.length) {
+			var buffer1 = _g1[_g];
+			++_g;
+			this._rect.x = rect.x - xx;
+			this._rect.y = rect.y - yy;
+			buffer1.fillRect(this._rect,color);
+			xx += this._maxWidth;
+			if(xx >= this._width) {
+				xx = 0;
+				yy += this._maxHeight;
+			}
+		}
+	}
+	,draw: function(x,y,source,rect) {
+		var xx = 0, yy = 0;
+		var _g = 0, _g1 = this._buffers;
+		while(_g < _g1.length) {
+			var buffer = _g1[_g];
+			++_g;
+			this._point.x = x - xx;
+			this._point.y = y - yy;
+			buffer.copyPixels(source,rect != null?rect:source.rect,this._point,null,null,true);
+			xx += this._maxWidth;
+			if(xx >= this._width) {
+				xx = 0;
+				yy += this._maxHeight;
+			}
+		}
+	}
+	,render: function(target,point,camera,layer) {
+		if(layer == null) layer = 10;
+		this._point.x = point.x + this.x - camera.x * this.scrollX;
+		this._point.y = point.y + this.y - camera.y * this.scrollY;
+		var xx = 0, yy = 0, buffer, px = this._point.x;
+		target.lock();
+		while(yy < this._refHeight) {
+			while(xx < this._refWidth) {
+				buffer = this._buffers[this._ref.getPixel(xx,yy)];
+				if(this._tint != null || this.blend != null) {
+					this._matrix.set_tx(this._point.x);
+					this._matrix.set_ty(this._point.y);
+					target.draw(buffer,this._matrix,this._tint,this.blend);
+				} else target.copyPixels(buffer,buffer.rect,this._point,null,null,true);
+				this._point.x += this._maxWidth;
+				xx++;
+			}
+			this._point.x = px;
+			this._point.y += this._maxHeight;
+			xx = 0;
+			yy++;
+		}
+		target.unlock();
+	}
+	,blend: null
+	,__class__: com.haxepunk.graphics.Canvas
+	,__properties__: {set_color:"setColor",get_color:"getColor",set_alpha:"setAlpha",get_alpha:"getAlpha",get_width:"getWidth",get_height:"getHeight"}
+});
 com.haxepunk.graphics.Graphiclist = function(graphic) {
 	com.haxepunk.Graphic.call(this);
 	this._graphics = new Array();
@@ -11847,6 +12135,293 @@ com.haxepunk.graphics.Text.prototype = $extend(com.haxepunk.graphics.Image.proto
 	,__class__: com.haxepunk.graphics.Text
 	,__properties__: $extend(com.haxepunk.graphics.Image.prototype.__properties__,{set_text:"setText",set_font:"setFont",set_size:"setSize"})
 });
+com.haxepunk.graphics.Tilemap = function(tileset,width,height,tileWidth,tileHeight) {
+	this._rect = com.haxepunk.HXP.rect;
+	this._width = width - width % tileWidth;
+	this._height = height - height % tileHeight;
+	this._columns = this._width / tileWidth | 0;
+	this._rows = this._height / tileHeight | 0;
+	if(this._columns == 0 || this._rows == 0) throw "Cannot create a bitmapdata of width/height = 0";
+	this._maxWidth -= this._maxWidth % tileWidth;
+	this._maxHeight -= this._maxHeight % tileHeight;
+	com.haxepunk.graphics.Canvas.call(this,this._width,this._height);
+	this._tile = new browser.geom.Rectangle(0,0,tileWidth,tileHeight);
+	this._map = new Array();
+	var _g1 = 0, _g = this._rows;
+	while(_g1 < _g) {
+		var y = _g1++;
+		this._map[y] = new Array();
+		var _g3 = 0, _g2 = this._columns;
+		while(_g3 < _g2) {
+			var x = _g3++;
+			this._map[y][x] = -1;
+		}
+	}
+	if(js.Boot.__instanceof(tileset,com.haxepunk.graphics.atlas.TileAtlas)) {
+		this._blit = false;
+		this._atlas = js.Boot.__cast(tileset , com.haxepunk.graphics.atlas.TileAtlas);
+	} else {
+		this._blit = false;
+		this._atlas = new com.haxepunk.graphics.atlas.TileAtlas(tileset,tileWidth,tileHeight);
+	}
+	if(this._set == null && this._atlas == null) throw "Invalid tileset graphic provided.";
+	if(this._blit) {
+		this._setColumns = this._set.get_width() / tileWidth | 0;
+		this._setRows = this._set.get_height() / tileHeight | 0;
+	} else {
+		this._setColumns = this._atlas.width / tileWidth | 0;
+		this._setRows = this._atlas.height / tileHeight | 0;
+	}
+	this._setCount = this._setColumns * this._setRows;
+};
+$hxClasses["com.haxepunk.graphics.Tilemap"] = com.haxepunk.graphics.Tilemap;
+com.haxepunk.graphics.Tilemap.__name__ = ["com","haxepunk","graphics","Tilemap"];
+com.haxepunk.graphics.Tilemap.__super__ = com.haxepunk.graphics.Canvas;
+com.haxepunk.graphics.Tilemap.prototype = $extend(com.haxepunk.graphics.Canvas.prototype,{
+	_tile: null
+	,_setCount: null
+	,_setRows: null
+	,_setColumns: null
+	,_atlas: null
+	,_set: null
+	,_rows: null
+	,_columns: null
+	,_map: null
+	,getRows: function() {
+		return this._rows;
+	}
+	,rows: null
+	,getColumns: function() {
+		return this._columns;
+	}
+	,columns: null
+	,getTileHeight: function() {
+		return this._tile.height | 0;
+	}
+	,tileHeight: null
+	,getTileWidth: function() {
+		return this._tile.width | 0;
+	}
+	,tileWidth: null
+	,updateTile: function(column,row) {
+		this.setTile(column,row,this._map[row % this._rows][column % this._columns]);
+	}
+	,render: function(target,point,camera,layer) {
+		if(layer == null) layer = 10;
+		if(this._blit) com.haxepunk.graphics.Canvas.prototype.render.call(this,target,point,camera,layer); else {
+			this._point.x = point.x + this.x - camera.x * this.scrollX;
+			this._point.y = point.y + this.y - camera.y * this.scrollY;
+			var scalex = com.haxepunk.HXP.screen.getFullScaleX(), scaley = com.haxepunk.HXP.screen.getFullScaleY(), tw = this.getTileWidth() | 0, th = this.getTileHeight() | 0;
+			var startx = -Math.floor(this._point.x / tw), starty = -Math.floor(this._point.y / th), destx = startx + Math.ceil(com.haxepunk.HXP.width / tw), desty = starty + Math.ceil(com.haxepunk.HXP.height / th);
+			startx = startx - 1;
+			starty = starty - 1;
+			if(startx > this._columns || starty > this._rows || destx < 0 || desty < 0) return;
+			if(startx < 0) startx = 0;
+			if(destx > this._columns) destx = this._columns;
+			if(starty < 0) starty = 0;
+			if(desty > this._rows) desty = this._rows;
+			var r = (this.getColor() >> 16 & 255) / 255, g = (this.getColor() >> 8 & 255) / 255, b = (this.getColor() & 255) / 255, wx = (this._point.x + startx * tw) * scalex, wy = (this._point.y + starty * th) * scaley, tile = 0;
+			var _g = starty;
+			while(_g < desty) {
+				var y = _g++;
+				var _g1 = startx;
+				while(_g1 < destx) {
+					var x = _g1++;
+					tile = this.getTile(x,y);
+					if(tile >= 0) this._atlas.prepareTile(tile,wx,wy,layer,scalex,scaley,0,r,g,b,this.getAlpha());
+					wx += tw * scalex;
+				}
+				wx = (this._point.x + startx * tw) * scalex;
+				wy += th * scaley;
+			}
+		}
+	}
+	,updateRect: function(rect,clear) {
+		var x = rect.x | 0, y = rect.y | 0, w = x + rect.width | 0, h = y + rect.height | 0, u = this.usePositions;
+		this.usePositions = false;
+		if(clear) while(y < h) {
+			while(x < w) this.clearTile(x++,y);
+			x = rect.x | 0;
+			y++;
+		} else while(y < h) {
+			while(x < w) this.updateTile(x++,y);
+			x = rect.x | 0;
+			y++;
+		}
+		this.usePositions = u;
+	}
+	,shiftTiles: function(columns,rows,wrap) {
+		if(wrap == null) wrap = false;
+		if(this.usePositions) {
+			columns = columns / this._tile.width | 0;
+			rows = rows / this._tile.height | 0;
+		}
+		if(columns != 0) {
+			var _g1 = 0, _g = this._rows;
+			while(_g1 < _g) {
+				var y = _g1++;
+				var row = this._map[y];
+				if(columns > 0) {
+					var _g2 = 0;
+					while(_g2 < columns) {
+						var x = _g2++;
+						var tile = row.pop();
+						if(wrap) row.unshift(tile);
+					}
+				} else {
+					var _g3 = 0, _g2 = Math.abs(columns) | 0;
+					while(_g3 < _g2) {
+						var x = _g3++;
+						var tile = row.shift();
+						if(wrap) row.push(tile);
+					}
+				}
+			}
+			this._columns = this._map[this.y | 0].length;
+		}
+		if(rows != 0) {
+			if(rows > 0) {
+				var _g = 0;
+				while(_g < rows) {
+					var y = _g++;
+					var row = this._map.pop();
+					if(wrap) this._map.unshift(row);
+				}
+			} else {
+				var _g1 = 0, _g = Math.abs(rows) | 0;
+				while(_g1 < _g) {
+					var y = _g1++;
+					var row = this._map.shift();
+					if(wrap) this._map.push(row);
+				}
+			}
+			this._rows = this._map.length;
+		}
+	}
+	,getIndex: function(tilesColumn,tilesRow) {
+		return tilesRow % this._setRows * this._setColumns + tilesColumn % this._setColumns;
+	}
+	,saveToString: function(columnSep,rowSep) {
+		if(rowSep == null) rowSep = "\n";
+		if(columnSep == null) columnSep = ",";
+		var s = "", x, y;
+		var _g1 = 0, _g = this._rows;
+		while(_g1 < _g) {
+			var y1 = _g1++;
+			var _g3 = 0, _g2 = this._columns;
+			while(_g3 < _g2) {
+				var x1 = _g3++;
+				s += Std.string(this.getTile(x1,y1));
+				if(x1 != this._columns - 1) s += columnSep;
+			}
+			if(y1 != this._rows - 1) s += rowSep;
+		}
+		return s;
+	}
+	,loadFromString: function(str,columnSep,rowSep) {
+		if(rowSep == null) rowSep = "\n";
+		if(columnSep == null) columnSep = ",";
+		var row = str.split(rowSep), rows = row.length, col, cols, x, y;
+		var _g = 0;
+		while(_g < rows) {
+			var y1 = _g++;
+			if(row[y1] == "") continue;
+			col = row[y1].split(columnSep);
+			cols = col.length;
+			var _g1 = 0;
+			while(_g1 < cols) {
+				var x1 = _g1++;
+				if(col[x1] == "") continue;
+				this.setTile(x1,y1,Std.parseInt(col[x1]));
+			}
+		}
+	}
+	,loadFrom2DArray: function(array) {
+		this._map = array;
+	}
+	,clearRect: function(column,row,width,height) {
+		if(height == null) height = 1;
+		if(width == null) width = 1;
+		if(this.usePositions) {
+			column = column / this._tile.width | 0;
+			row = row / this._tile.height | 0;
+			width = width / this._tile.width | 0;
+			height = height / this._tile.height | 0;
+		}
+		column %= this._columns;
+		row %= this._rows;
+		var c = column, r = column + width, b = row + height, u = this.usePositions;
+		this.usePositions = false;
+		while(row < b) {
+			while(column < r) {
+				this.clearTile(column,row);
+				column++;
+			}
+			column = c;
+			row++;
+		}
+		this.usePositions = u;
+	}
+	,setRect: function(column,row,width,height,index) {
+		if(index == null) index = 0;
+		if(height == null) height = 1;
+		if(width == null) width = 1;
+		if(this.usePositions) {
+			column = column / this._tile.width | 0;
+			row = row / this._tile.height | 0;
+			width = width / this._tile.width | 0;
+			height = height / this._tile.height | 0;
+		}
+		column %= this._columns;
+		row %= this._rows;
+		var c = column, r = column + width, b = row + height, u = this.usePositions;
+		this.usePositions = false;
+		while(row < b) {
+			while(column < r) {
+				this.setTile(column,row,index);
+				column++;
+			}
+			column = c;
+			row++;
+		}
+		this.usePositions = u;
+	}
+	,getTile: function(column,row) {
+		if(this.usePositions) {
+			column = column / this._tile.width | 0;
+			row = row / this._tile.height | 0;
+		}
+		return this._map[row % this._rows][column % this._columns];
+	}
+	,clearTile: function(column,row) {
+		if(this.usePositions) {
+			column = column / this._tile.width | 0;
+			row = row / this._tile.height | 0;
+		}
+		column %= this._columns;
+		row %= this._rows;
+		this._tile.x = column * this._tile.width;
+		this._tile.y = row * this._tile.height;
+		if(this._blit) this.fill(this._tile,0,0);
+	}
+	,setTile: function(column,row,index) {
+		if(index == null) index = 0;
+		if(this.usePositions) {
+			column = column / this._tile.width | 0;
+			row = row / this._tile.height | 0;
+		}
+		index %= this._setCount;
+		column %= this._columns;
+		row %= this._rows;
+		this._tile.x = index % this._setColumns * this._tile.width;
+		this._tile.y = (index / this._setColumns | 0) * this._tile.height;
+		this._map[row][column] = index;
+		if(this._blit) this.draw(column * this._tile.width | 0,row * this._tile.height | 0,this._set,this._tile);
+	}
+	,usePositions: null
+	,__class__: com.haxepunk.graphics.Tilemap
+	,__properties__: $extend(com.haxepunk.graphics.Canvas.prototype.__properties__,{get_tileWidth:"getTileWidth",get_tileHeight:"getTileHeight",get_columns:"getColumns",get_rows:"getRows"})
+});
 com.haxepunk.graphics.atlas = {}
 com.haxepunk.graphics.atlas.Layer = function() {
 	this.data = new Array();
@@ -12071,6 +12646,42 @@ com.haxepunk.graphics.atlas.TextureAtlas.prototype = $extend(com.haxepunk.graphi
 		throw "Region has not be defined yet: " + name;
 	}
 	,__class__: com.haxepunk.graphics.atlas.TextureAtlas
+});
+com.haxepunk.graphics.atlas.TileAtlas = function(source,tileWidth,tileHeight) {
+	var bd;
+	if(js.Boot.__instanceof(source,browser.display.BitmapData)) bd = source; else bd = com.haxepunk.HXP.getBitmap(source);
+	this._regions = new IntHash();
+	com.haxepunk.graphics.atlas.Atlas.call(this,bd);
+	this.prepareTiles(bd._nmeTextureBuffer != null?bd._nmeTextureBuffer.width:0,bd._nmeTextureBuffer != null?bd._nmeTextureBuffer.height:0,tileWidth,tileHeight);
+};
+$hxClasses["com.haxepunk.graphics.atlas.TileAtlas"] = com.haxepunk.graphics.atlas.TileAtlas;
+com.haxepunk.graphics.atlas.TileAtlas.__name__ = ["com","haxepunk","graphics","atlas","TileAtlas"];
+com.haxepunk.graphics.atlas.TileAtlas.__super__ = com.haxepunk.graphics.atlas.Atlas;
+com.haxepunk.graphics.atlas.TileAtlas.prototype = $extend(com.haxepunk.graphics.atlas.Atlas.prototype,{
+	_regions: null
+	,prepareTiles: function(width,height,tileWidth,tileHeight) {
+		var cols = Math.floor(width / tileWidth);
+		var rows = Math.floor(height / tileHeight);
+		com.haxepunk.HXP.rect.width = tileWidth;
+		com.haxepunk.HXP.rect.height = tileHeight;
+		com.haxepunk.HXP.point.x = com.haxepunk.HXP.point.y = 0;
+		var _g = 0;
+		while(_g < rows) {
+			var y = _g++;
+			com.haxepunk.HXP.rect.y = y * tileHeight;
+			var _g1 = 0;
+			while(_g1 < cols) {
+				var x = _g1++;
+				com.haxepunk.HXP.rect.x = x * tileWidth;
+				var region = this.createRegion(com.haxepunk.HXP.rect,com.haxepunk.HXP.point);
+				this._regions.set(region.tileIndex,region);
+			}
+		}
+	}
+	,getRegion: function(index) {
+		return this._regions.get(index);
+	}
+	,__class__: com.haxepunk.graphics.atlas.TileAtlas
 });
 com.haxepunk.masks = {}
 com.haxepunk.masks.Hitbox = function(width,height,x,y) {
@@ -15690,11 +16301,19 @@ nme.installer.Assets.initialize = function() {
 		nme.installer.Assets.resourceClasses.set("font/04B_03__.ttf",NME_font_04b_03___ttf);
 		nme.installer.Assets.resourceNames.set("font/04B_03__.ttf","font/04B_03__.ttf");
 		nme.installer.Assets.resourceTypes.set("font/04B_03__.ttf","font");
+		nme.installer.Assets.resourceNames.set("gfx/tileset.png","gfx/tileset.png");
+		nme.installer.Assets.resourceTypes.set("gfx/tileset.png","image");
 		nme.installer.Assets.resourceNames.set("gfx/block.png","gfx/block.png");
 		nme.installer.Assets.resourceTypes.set("gfx/block.png","image");
+		nme.installer.Assets.resourceNames.set("gfx/floor.png","gfx/floor.png");
+		nme.installer.Assets.resourceTypes.set("gfx/floor.png","image");
+		nme.installer.Assets.resourceNames.set("gfx/wall.png","gfx/wall.png");
+		nme.installer.Assets.resourceTypes.set("gfx/wall.png","image");
 		nme.installer.Assets.resourceClasses.set("font/04B_03__.ttf",NME_font_5);
 		nme.installer.Assets.resourceNames.set("font/04B_03__.ttf","font/04B_03__.ttf");
 		nme.installer.Assets.resourceTypes.set("font/04B_03__.ttf","font");
+		nme.installer.Assets.resourceNames.set("atlas/tiles.xml","atlas/tiles.xml");
+		nme.installer.Assets.resourceTypes.set("atlas/tiles.xml","text");
 		nme.installer.Assets.initialized = true;
 	}
 }
@@ -15711,14 +16330,14 @@ nme.installer.Assets.getBitmapData = function(id,useCache) {
 		var libraryName = HxOverrides.substr(id,0,id.indexOf(":"));
 		var symbolName = HxOverrides.substr(id,id.indexOf(":") + 1,null);
 		if(nme.installer.Assets.libraryTypes.exists(libraryName)) {
-		} else haxe.Log.trace("[nme.Assets] There is no asset library named \"" + libraryName + "\"",{ fileName : "Assets.hx", lineNumber : 165, className : "nme.installer.Assets", methodName : "getBitmapData"});
-	} else haxe.Log.trace("[nme.Assets] There is no BitmapData asset with an ID of \"" + id + "\"",{ fileName : "Assets.hx", lineNumber : 171, className : "nme.installer.Assets", methodName : "getBitmapData"});
+		} else haxe.Log.trace("[nme.Assets] There is no asset library named \"" + libraryName + "\"",{ fileName : "Assets.hx", lineNumber : 181, className : "nme.installer.Assets", methodName : "getBitmapData"});
+	} else haxe.Log.trace("[nme.Assets] There is no BitmapData asset with an ID of \"" + id + "\"",{ fileName : "Assets.hx", lineNumber : 187, className : "nme.installer.Assets", methodName : "getBitmapData"});
 	return null;
 }
 nme.installer.Assets.getBytes = function(id) {
 	nme.installer.Assets.initialize();
 	if(nme.installer.Assets.resourceNames.exists(id)) return ApplicationMain.urlLoaders.get(nme.installer.Assets.getResourceName(id)).data;
-	haxe.Log.trace("[nme.Assets] There is no String or ByteArray asset with an ID of \"" + id + "\"",{ fileName : "Assets.hx", lineNumber : 190, className : "nme.installer.Assets", methodName : "getBytes"});
+	haxe.Log.trace("[nme.Assets] There is no String or ByteArray asset with an ID of \"" + id + "\"",{ fileName : "Assets.hx", lineNumber : 206, className : "nme.installer.Assets", methodName : "getBytes"});
 	return null;
 }
 nme.installer.Assets.getFont = function(id) {
@@ -15726,7 +16345,7 @@ nme.installer.Assets.getFont = function(id) {
 	if(nme.installer.Assets.resourceNames.exists(id) && nme.installer.Assets.resourceTypes.exists(id)) {
 		if(nme.installer.Assets.resourceTypes.get(id).toLowerCase() == "font") return js.Boot.__cast(Type.createInstance(nme.installer.Assets.resourceClasses.get(id),[]) , browser.text.Font);
 	}
-	haxe.Log.trace("[nme.Assets] There is no Font asset with an ID of \"" + id + "\"",{ fileName : "Assets.hx", lineNumber : 211, className : "nme.installer.Assets", methodName : "getFont"});
+	haxe.Log.trace("[nme.Assets] There is no Font asset with an ID of \"" + id + "\"",{ fileName : "Assets.hx", lineNumber : 227, className : "nme.installer.Assets", methodName : "getFont"});
 	return null;
 }
 nme.installer.Assets.getMovieClip = function(id) {
@@ -15734,7 +16353,7 @@ nme.installer.Assets.getMovieClip = function(id) {
 	var libraryName = HxOverrides.substr(id,0,id.indexOf(":"));
 	var symbolName = HxOverrides.substr(id,id.indexOf(":") + 1,null);
 	if(nme.installer.Assets.libraryTypes.exists(libraryName)) {
-	} else haxe.Log.trace("[nme.Assets] There is no asset library named \"" + libraryName + "\"",{ fileName : "Assets.hx", lineNumber : 263, className : "nme.installer.Assets", methodName : "getMovieClip"});
+	} else haxe.Log.trace("[nme.Assets] There is no asset library named \"" + libraryName + "\"",{ fileName : "Assets.hx", lineNumber : 279, className : "nme.installer.Assets", methodName : "getMovieClip"});
 	return null;
 }
 nme.installer.Assets.getResourceName = function(id) {
@@ -15746,7 +16365,7 @@ nme.installer.Assets.getSound = function(id) {
 	if(nme.installer.Assets.resourceNames.exists(id) && nme.installer.Assets.resourceTypes.exists(id)) {
 		if(nme.installer.Assets.resourceTypes.get(id).toLowerCase() == "sound") return new browser.media.Sound(new browser.net.URLRequest(nme.installer.Assets.resourceNames.get(id))); else if(nme.installer.Assets.resourceTypes.get(id).toLowerCase() == "music") return new browser.media.Sound(new browser.net.URLRequest(nme.installer.Assets.resourceNames.get(id)));
 	}
-	haxe.Log.trace("[nme.Assets] There is no Sound asset with an ID of \"" + id + "\"",{ fileName : "Assets.hx", lineNumber : 299, className : "nme.installer.Assets", methodName : "getSound"});
+	haxe.Log.trace("[nme.Assets] There is no Sound asset with an ID of \"" + id + "\"",{ fileName : "Assets.hx", lineNumber : 315, className : "nme.installer.Assets", methodName : "getSound"});
 	return null;
 }
 nme.installer.Assets.getText = function(id) {
@@ -15821,6 +16440,7 @@ browser.text.Font.DEFAULT_FONT_DATA = "q:55oy6:ascentd950.5y4:dataad84d277.5d564
 browser.text.Font.DEFAULT_FONT_SCALE = 9.0;
 browser.text.Font.DEFAULT_FONT_NAME = "Bitstream_Vera_Sans";
 browser.text.Font.DEFAULT_CLASS_NAME = "browser.text.Font";
+GameWorld.map = [[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,0,0,0,1,1,1,1,1,1,0,0,0,1,1,1,1,1],[1,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,1,0,1,1],[1,1,0,0,0,1,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,1],[1,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,1,1],[1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1],[1,1,0,0,1,0,0,0,0,0,0,0,1,1,1,1,1,1,0,1,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1],[1,0,0,0,0,0,1,1,0,0,0,0,0,1,0,0,1,0,0,0,0,1],[1,1,1,1,1,1,1,1,1,1,0,0,1,1,0,0,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,0,0,0,0,0,0,1],[1,1,1,1,1,1,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]];
 browser.display.DisplayObject.GRAPHICS_INVALID = 2;
 browser.display.DisplayObject.MATRIX_INVALID = 4;
 browser.display.DisplayObject.MATRIX_CHAIN_INVALID = 8;

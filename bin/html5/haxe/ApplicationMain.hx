@@ -78,9 +78,30 @@ class ApplicationMain {
 		
 		
 		var loader:Loader = new Loader ();
+		loaders.set ("gfx/tileset.png", loader);
+		total ++;
+		
+		
+		var loader:Loader = new Loader ();
 		loaders.set ("gfx/block.png", loader);
 		total ++;
 		
+		
+		var loader:Loader = new Loader ();
+		loaders.set ("gfx/floor.png", loader);
+		total ++;
+		
+		
+		var loader:Loader = new Loader ();
+		loaders.set ("gfx/wall.png", loader);
+		total ++;
+		
+		
+		
+		var urlLoader:URLLoader = new URLLoader ();
+		urlLoader.dataFormat = TEXT;
+		urlLoaders.set ("atlas/tiles.xml", urlLoader);
+		total ++;
 		
 		
 		if (total == 0) {
@@ -169,15 +190,39 @@ class ApplicationMain {
 			
 		}
 		
+		if (inName=="gfx/tileset.png") {
+			
+			return Assets.getBitmapData ("gfx/tileset.png");
+			
+		}
+		
 		if (inName=="gfx/block.png") {
 			
 			return Assets.getBitmapData ("gfx/block.png");
 			
 		}
 		
+		if (inName=="gfx/floor.png") {
+			
+			return Assets.getBitmapData ("gfx/floor.png");
+			
+		}
+		
+		if (inName=="gfx/wall.png") {
+			
+			return Assets.getBitmapData ("gfx/wall.png");
+			
+		}
+		
 		if (inName=="font/04B_03__.ttf") {
 			
 			return Assets.getFont ("font/04B_03__.ttf");
+			
+		}
+		
+		if (inName=="atlas/tiles.xml") {
+			
+			return Assets.getText ("atlas/tiles.xml");
 			
 		}
 		
@@ -254,7 +299,15 @@ class ApplicationMain {
 	
 
 	
+
+	
+
+	
+
+	
 		class NME_font_5 extends nme.text.Font { }
+	
+
 	
 
 

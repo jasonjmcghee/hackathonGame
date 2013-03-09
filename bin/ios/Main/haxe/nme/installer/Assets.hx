@@ -56,8 +56,14 @@ class Assets {
 			resourceTypes.set ("gfx/debug/console_output.png", "image");
 			resourceNames.set ("font/04B_03__.ttf", "font_04b_03___ttf");
 			resourceTypes.set ("font/04B_03__.ttf", "font");
+			resourceNames.set ("gfx/tileset.png", "gfx_tileset_png");
+			resourceTypes.set ("gfx/tileset.png", "image");
 			resourceNames.set ("gfx/block.png", "gfx_block_png");
 			resourceTypes.set ("gfx/block.png", "image");
+			resourceNames.set ("gfx/floor.png", "gfx_floor_png");
+			resourceTypes.set ("gfx/floor.png", "image");
+			resourceNames.set ("gfx/wall.png", "gfx_wall_png");
+			resourceTypes.set ("gfx/wall.png", "image");
 			resourceNames.set ("font/04B_03__.ttf", "font_5");
 			resourceTypes.set ("font/04B_03__.ttf", "font");
 			

@@ -162,6 +162,11 @@ class ApplicationMain {
 			 return Assets.getFont ("font/04B_03__.ttf");
 		 
 		
+		if (inName=="atlas/tiles.xml")
+			 
+			 return Assets.getText ("atlas/tiles.xml");
+         
+		
 		
 		return null;
 		
@@ -194,6 +199,7 @@ class NME_gfx_block_png extends nme.display.BitmapData { public function new () 
 class NME_gfx_floor_png extends nme.display.BitmapData { public function new () { super (0, 0); } }
 class NME_gfx_wall_png extends nme.display.BitmapData { public function new () { super (0, 0); } }
 class NME_font_5 extends nme.text.Font { }
+class NME_atlas_tiles_xml extends nme.utils.ByteArray { }
 
 
 #else

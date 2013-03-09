@@ -130,10 +130,31 @@ class ApplicationMain
 			
 		}
 		
+		if (inName == "gfx/tileset.png")
+		{
+			
+			return nme.Assets.getBitmapData ("gfx/tileset.png");
+			
+		}
+		
 		if (inName == "gfx/block.png")
 		{
 			
 			return nme.Assets.getBitmapData ("gfx/block.png");
+			
+		}
+		
+		if (inName == "gfx/floor.png")
+		{
+			
+			return nme.Assets.getBitmapData ("gfx/floor.png");
+			
+		}
+		
+		if (inName == "gfx/wall.png")
+		{
+			
+			return nme.Assets.getBitmapData ("gfx/wall.png");
 			
 		}
 		
