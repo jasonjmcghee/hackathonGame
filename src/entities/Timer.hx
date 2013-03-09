@@ -7,21 +7,26 @@ import com.haxepunk.HXP;
 class Timer extends Entity {
   
   private var time:Int;
+  private var alive:Bool = true;
 
   public function new() {
 
     super();
     time = 0;
-    graphic = new Text('Time Alive: ' + time + ' seconds');
   }
 
   public override function update() {
     
     super.update();
-    time = Math.floor(HXP.timeFlag()*1000.0);
+    if (alive) time+=1;
+    graphic = new Text('Score: ' + time);
   }
 
   public function getTime():Int {
     return time;
+  }
+
+  public function halt():Void {
+    alive = false;
   }
 }

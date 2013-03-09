@@ -78,6 +78,11 @@ class ApplicationMain {
 		
 		
 		var loader:Loader = new Loader ();
+		loaders.set ("gfx/walls.png", loader);
+		total ++;
+		
+		
+		var loader:Loader = new Loader ();
 		loaders.set ("gfx/tileset.png", loader);
 		total ++;
 		
@@ -88,7 +93,17 @@ class ApplicationMain {
 		
 		
 		var loader:Loader = new Loader ();
+		loaders.set ("gfx/wall32.png", loader);
+		total ++;
+		
+		
+		var loader:Loader = new Loader ();
 		loaders.set ("gfx/lava.png", loader);
+		total ++;
+		
+		
+		var loader:Loader = new Loader ();
+		loaders.set ("gfx/blob.png", loader);
 		total ++;
 		
 		
@@ -189,6 +204,12 @@ class ApplicationMain {
 			
 		}
 		
+		if (inName=="gfx/walls.png") {
+			
+			return Assets.getBitmapData ("gfx/walls.png");
+			
+		}
+		
 		if (inName=="gfx/tileset.png") {
 			
 			return Assets.getBitmapData ("gfx/tileset.png");
@@ -201,9 +222,21 @@ class ApplicationMain {
 			
 		}
 		
+		if (inName=="gfx/wall32.png") {
+			
+			return Assets.getBitmapData ("gfx/wall32.png");
+			
+		}
+		
 		if (inName=="gfx/lava.png") {
 			
 			return Assets.getBitmapData ("gfx/lava.png");
+			
+		}
+		
+		if (inName=="gfx/blob.png") {
+			
+			return Assets.getBitmapData ("gfx/blob.png");
 			
 		}
 		
@@ -293,6 +326,12 @@ class ApplicationMain {
 
 	
 		class NME_font_04b_03___ttf extends nme.text.Font { }
+	
+
+	
+
+	
+
 	
 
 	

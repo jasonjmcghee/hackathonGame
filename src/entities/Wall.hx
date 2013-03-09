@@ -7,7 +7,7 @@ class Wall extends Entity {
 
   public function new(posX:Int, posY:Int) {
     super(posX, posY);
-    graphic = new Image("gfx/wall.png");
+    graphic = new Image("gfx/wall32.png");
     setHitbox(32, 32);
     type = "wall";
     x = posX * 32;

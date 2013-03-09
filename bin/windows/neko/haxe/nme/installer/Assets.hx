@@ -60,6 +60,8 @@ class Assets {
 			resourceTypes.set ("gfx/tileset.png", "image");
 			resourceNames.set ("gfx/block.png", "gfx/block.png");
 			resourceTypes.set ("gfx/block.png", "image");
+			resourceNames.set ("gfx/lava.png", "gfx/lava.png");
+			resourceTypes.set ("gfx/lava.png", "image");
 			resourceNames.set ("gfx/floor.png", "gfx/floor.png");
 			resourceTypes.set ("gfx/floor.png", "image");
 			resourceNames.set ("gfx/wall.png", "gfx/wall.png");

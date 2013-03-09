@@ -21,7 +21,7 @@ class Blob extends Entity {
 
   public function new(posX:Int, posY:Int, hero:Hero) {
     super(posX, posY);
-    graphic = new Image("gfx/block.png");
+    graphic = new Image("gfx/blob.png");
     setHitbox(32, 32);
     enemy = hero;
     type = "blob";

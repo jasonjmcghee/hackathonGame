@@ -174,6 +174,13 @@ class ApplicationMain
 			
 		}
 		
+		if (inName == "gfx/lava.png")
+		{
+			
+			return nme.Assets.getBitmapData ("gfx/lava.png");
+			
+		}
+		
 		if (inName == "gfx/floor.png")
 		{
 			

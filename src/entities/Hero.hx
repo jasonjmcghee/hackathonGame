@@ -79,8 +79,8 @@ class Hero extends Entity {
   private var xAccel:Float;
   private var yAccel:Float;
   private static inline var maxVelocity:Float = 12;
-  private static inline var speed:Float = 3;
-  private static inline var drag:Float = 0.4;
+  private static inline var speed:Float = 4;
+  private static inline var drag:Float = 0.2;
   private var isDead:Bool = false;
 
 }

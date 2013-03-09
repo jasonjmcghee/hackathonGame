@@ -20,7 +20,6 @@ class GameWorld extends World {
 
   public override function begin() {
 
-
      // X Direction walls
     for (i in 0...worldWidth) {
         add(new Wall(i,0));
@@ -49,8 +48,8 @@ class GameWorld extends World {
 
 
     // Naive generation
-    for (i in 0...Math.floor(worldWidth)) {
-      for (j in 0...Math.floor(worldHeight)) {
+    for (i in 0...Math.floor(worldWidth-1)) {
+      for (j in 0...Math.floor(worldHeight-1)) {
         if (!(i > worldWidth / 3 && j < Math.floor(worldWidth / 3) ||
         i < 2 * worldWidth / 3 && j > Math.floor(2* worldWidth / 3))) {
           if (Math.random() < 0.05) {
@@ -81,7 +80,7 @@ class GameWorld extends World {
 
   public override function update() {
 
-    if (timer.getTime() > 5 && hero.isAlive()) {
+    if (hero.isAlive()) {
       HXP.camera.x = hero.x - HXP.halfWidth;
       HXP.camera.y = hero.y - HXP.halfHeight;
       if (HXP.camera.x < 0) HXP.camera.x = 0;
@@ -98,6 +97,7 @@ class GameWorld extends World {
 
   public function gameOver() {
     isGameOver = true;
+    timer.halt();
   }
 
   private var timer:Timer;

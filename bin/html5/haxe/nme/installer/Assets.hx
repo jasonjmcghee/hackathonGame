@@ -77,6 +77,10 @@ class Assets {
 			resourceTypes.set ("font/04B_03__.ttf", "font");
 			
 			
+			resourceNames.set ("gfx/walls.png", "gfx/walls.png");
+			resourceTypes.set ("gfx/walls.png", "image");
+			
+			
 			resourceNames.set ("gfx/tileset.png", "gfx/tileset.png");
 			resourceTypes.set ("gfx/tileset.png", "image");
 			
@@ -85,8 +89,16 @@ class Assets {
 			resourceTypes.set ("gfx/block.png", "image");
 			
 			
+			resourceNames.set ("gfx/wall32.png", "gfx/wall32.png");
+			resourceTypes.set ("gfx/wall32.png", "image");
+			
+			
 			resourceNames.set ("gfx/lava.png", "gfx/lava.png");
 			resourceTypes.set ("gfx/lava.png", "image");
+			
+			
+			resourceNames.set ("gfx/blob.png", "gfx/blob.png");
+			resourceTypes.set ("gfx/blob.png", "image");
 			
 			
 			resourceNames.set ("gfx/floor.png", "gfx/floor.png");
