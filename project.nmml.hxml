@@ -7,8 +7,12 @@
 -cp /usr/lib/haxe/lib/HaxePunk/2,0,3/
 -D nme_install_tool
 -D APP_COMPANY
+-D html5
 -D web
--swf-version 11
--swf9 bin/flash/bin/Main.swf
--swf-header 800:550:60:333333
--cp bin/flash/haxe
+-js bin/html5/bin/Main.js
+-cp bin/html5/haxe
+-D html5
+-D html
+--remap flash:nme
+--remap native:browser
+--js-modern

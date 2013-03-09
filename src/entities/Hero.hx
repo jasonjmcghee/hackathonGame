@@ -13,8 +13,8 @@ class Hero extends Entity {
   private var yVel:Float;
   private var xAccel:Float;
   private var yAccel:Float;
-  private static inline var maxVelocity:Float = 10;
-  private static inline var speed:Float = 4;
+  private static inline var maxVelocity:Float = 12;
+  private static inline var speed:Float = 3;
   private static inline var drag:Float = 0.4;
 
   public function new(posX:Int, posY:Int) {
@@ -44,6 +44,10 @@ class Hero extends Entity {
         yVel *= -1;
       }
       move();
+
+      if (collide("blob", x, y)) {
+        
+      }
   }
 
   private function move() {
