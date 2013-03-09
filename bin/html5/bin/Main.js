@@ -1034,7 +1034,8 @@ $hxClasses["GameWorld"] = GameWorld;
 GameWorld.__name__ = ["GameWorld"];
 GameWorld.__super__ = com.haxepunk.World;
 GameWorld.prototype = $extend(com.haxepunk.World.prototype,{
-	update: function() {
+	hero: null
+	,update: function() {
 		com.haxepunk.HXP.camera.x = this.hero.x - com.haxepunk.HXP.halfWidth;
 		com.haxepunk.HXP.camera.y = this.hero.y - com.haxepunk.HXP.halfHeight;
 		com.haxepunk.World.prototype.update.call(this);
@@ -1043,27 +1044,18 @@ GameWorld.prototype = $extend(com.haxepunk.World.prototype,{
 		this.hero = new entities.Hero(50,50);
 		this.add(this.hero);
 		var _g = 0;
-		while(_g < 20) {
+		while(_g < 40) {
 			var i = _g++;
 			this.add(new entities.Wall(i,0));
-			this.add(new entities.Wall(i,14));
+			this.add(new entities.Wall(i,28));
 		}
 		var _g = 0;
-		while(_g < 14) {
+		while(_g < 28) {
 			var i = _g++;
 			this.add(new entities.Wall(0,i));
-			this.add(new entities.Wall(19,i));
-		}
-		var _g = 1;
-		while(_g < 5) {
-			var i = _g++;
-			this.add(new entities.Wall(5 - i,14 - i));
-			this.add(new entities.Wall(8 + i,5 + i));
-			this.add(new entities.Wall(2 + i,10 - i));
-			this.add(new entities.Wall(13 + i,8 - i));
+			this.add(new entities.Wall(39,i));
 		}
 	}
-	,hero: null
 	,__class__: GameWorld
 });
 var Hash = function() {
@@ -11692,6 +11684,99 @@ com.haxepunk.graphics.Canvas.prototype = $extend(com.haxepunk.Graphic.prototype,
 	,__class__: com.haxepunk.graphics.Canvas
 	,__properties__: {set_color:"setColor",get_color:"getColor",set_alpha:"setAlpha",get_alpha:"getAlpha",get_width:"getWidth",get_height:"getHeight"}
 });
+com.haxepunk.graphics.Backdrop = function(source,repeatX,repeatY) {
+	if(repeatY == null) repeatY = true;
+	if(repeatX == null) repeatX = true;
+	if(js.Boot.__instanceof(source,browser.display.BitmapData)) {
+		this._blit = true;
+		this._source = source;
+		this._textWidth = this._source.get_width();
+		this._textHeight = this._source.get_height();
+	} else if(js.Boot.__instanceof(source,com.haxepunk.graphics.atlas.AtlasRegion)) {
+		this._blit = false;
+		this._region = source;
+		this._textWidth = source.rect.width | 0;
+		this._textHeight = source.rect.height | 0;
+	} else if(js.Boot.__instanceof(source,Dynamic)) {
+		this._blit = true;
+		this._source = com.haxepunk.HXP.getBitmap(source);
+		this._textWidth = this._source.get_width();
+		this._textHeight = this._source.get_height();
+	}
+	if(this._source == null && this._region == null) {
+		this._blit = true;
+		this._source = com.haxepunk.HXP.createBitmap(com.haxepunk.HXP.width,com.haxepunk.HXP.height,true);
+		this._textWidth = this._source.get_width();
+		this._textHeight = this._source.get_height();
+	}
+	this._repeatX = repeatX;
+	this._repeatY = repeatY;
+	com.haxepunk.graphics.Canvas.call(this,com.haxepunk.HXP.width * (repeatX?1:0) + this._textWidth,com.haxepunk.HXP.height * (repeatY?1:0) + this._textHeight);
+	if(this._blit) {
+		com.haxepunk.HXP.rect.x = com.haxepunk.HXP.rect.y = 0;
+		com.haxepunk.HXP.rect.width = this._width;
+		com.haxepunk.HXP.rect.height = this._height;
+		this.fillTexture(com.haxepunk.HXP.rect,this._source);
+	}
+};
+$hxClasses["com.haxepunk.graphics.Backdrop"] = com.haxepunk.graphics.Backdrop;
+com.haxepunk.graphics.Backdrop.__name__ = ["com","haxepunk","graphics","Backdrop"];
+com.haxepunk.graphics.Backdrop.__super__ = com.haxepunk.graphics.Canvas;
+com.haxepunk.graphics.Backdrop.prototype = $extend(com.haxepunk.graphics.Canvas.prototype,{
+	_y: null
+	,_x: null
+	,_repeatY: null
+	,_repeatX: null
+	,_textHeight: null
+	,_textWidth: null
+	,_region: null
+	,_source: null
+	,render: function(target,point,camera,layer) {
+		if(layer == null) layer = 10;
+		this._point.x = point.x + this.x - camera.x * this.scrollX;
+		this._point.y = point.y + this.y - camera.y * this.scrollY;
+		if(this._repeatX) {
+			this._point.x %= this._textWidth;
+			if(this._point.x > 0) this._point.x -= this._textWidth;
+		}
+		if(this._repeatY) {
+			this._point.y %= this._textHeight;
+			if(this._point.y > 0) this._point.y -= this._textHeight;
+		}
+		if(this._blit) {
+			this._x = this.x;
+			this._y = this.y;
+			this.x = this.y = 0;
+			com.haxepunk.graphics.Canvas.prototype.render.call(this,target,this._point,com.haxepunk.HXP.zero);
+			this.x = this._x;
+			this.y = this._y;
+		} else {
+			var sx = com.haxepunk.HXP.screen.getFullScaleX(), sy = com.haxepunk.HXP.screen.getFullScaleY(), r = (this._color >> 16 & 255) / 255, g = (this._color >> 8 & 255) / 255, b = (this._color & 255) / 255, px = this._point.x * sx, py = this._point.y * sy;
+			var y = 0;
+			while(y <= this._height * sy) {
+				var x = 0;
+				while(x <= this._width * sx) {
+					this._region.draw(px + x,py + y,layer,sx,sy,0,r,g,b,this._alpha);
+					x += this._textWidth * sx;
+				}
+				y += this._textHeight * sy;
+			}
+		}
+	}
+	,setBitmapSource: function(bitmap) {
+		this._blit = true;
+		this._source = bitmap;
+		this._textWidth = this._source.get_width();
+		this._textHeight = this._source.get_height();
+	}
+	,setAtlasRegion: function(region) {
+		this._blit = false;
+		this._region = region;
+		this._textWidth = region.rect.width | 0;
+		this._textHeight = region.rect.height | 0;
+	}
+	,__class__: com.haxepunk.graphics.Backdrop
+});
 com.haxepunk.graphics.Graphiclist = function(graphic) {
 	com.haxepunk.Graphic.call(this);
 	this._graphics = new Array();
@@ -14316,6 +14401,22 @@ com.haxepunk.utils.Key.nameOfKey = function($char) {
 	return String.fromCharCode($char);
 }
 var entities = {}
+entities.Floor = function() {
+	com.haxepunk.Entity.call(this);
+	var _tiles = new com.haxepunk.graphics.Tilemap("gfx/tileset.png",64,32,32,32);
+	_tiles.setTile(0,0);
+	var _bitmapData = new browser.display.BitmapData(_tiles.getWidth(),_tiles.getHeight(),true,16777215);
+	_tiles.render(_bitmapData,new browser.geom.Point(0,0),com.haxepunk.HXP.camera.clone());
+	var _backdrop = new com.haxepunk.graphics.Backdrop(_bitmapData);
+	_backdrop.scrollX = _backdrop.scrollY = .5;
+	this.setGraphic(_backdrop);
+};
+$hxClasses["entities.Floor"] = entities.Floor;
+entities.Floor.__name__ = ["entities","Floor"];
+entities.Floor.__super__ = com.haxepunk.Entity;
+entities.Floor.prototype = $extend(com.haxepunk.Entity.prototype,{
+	__class__: entities.Floor
+});
 entities.Hero = function(posX,posY) {
 	com.haxepunk.Entity.call(this,posX,posY);
 	this.setGraphic(new com.haxepunk.graphics.Image("gfx/block.png"));
@@ -14341,16 +14442,18 @@ entities.Hero.prototype = $extend(com.haxepunk.Entity.prototype,{
 		}
 		if(this.xVel < 0) this.xVel = Math.min(this.xVel + 0.4,0); else if(this.xVel > 0) this.xVel = Math.max(this.xVel - 0.4,0);
 		if(this.yVel < 0) this.yVel = Math.min(this.yVel + 0.4,0); else if(this.yVel > 0) this.yVel = Math.max(this.yVel - 0.4,0);
+		this.moveBy(this.xVel,this.yVel);
 	}
 	,update: function() {
 		com.haxepunk.Entity.prototype.update.call(this);
 		this.handleInput();
-		this.move();
-		this.moveBy(this.xVel,this.yVel);
-		if(this.collide("wall",this.x,this.y) != null) {
+		if(this.collide("wall",this.x + com.haxepunk.HXP.sign(this.xVel) * 2,this.y + com.haxepunk.HXP.sign(this.yVel) * 4) != null) {
+			this.x -= com.haxepunk.HXP.sign(this.xVel);
+			this.y -= com.haxepunk.HXP.sign(this.yVel);
 			this.xVel *= -1;
 			this.yVel *= -1;
 		}
+		this.move();
 	}
 	,handleInput: function() {
 		this.xAccel = 0;

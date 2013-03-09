@@ -20,10 +20,10 @@ class ApplicationMain
 		wx.App.boot(function()
 		{
 			
-			frame = wx.Frame.create(null, null, "HackGame", null, { width: 640, height: 480 });
+			frame = wx.Frame.create(null, null, "HackGame", null, { width: 800, height: 550 });
 			
 			#if nme
-			var stage = wx.NMEStage.create(frame, null, null, { width: 640, height: 480 });
+			var stage = wx.NMEStage.create(frame, null, null, { width: 800, height: 550 });
 			#end
 			
 			Main.main();
@@ -38,7 +38,7 @@ class ApplicationMain
 		
 		nme.Lib.create(function()
 			{ 
-				//if ((640 == 0 && 480 == 0) || false)
+				//if ((800 == 0 && 550 == 0) || false)
 				//{
 					nme.Lib.current.stage.align = nme.display.StageAlign.TOP_LEFT;
 					nme.Lib.current.stage.scaleMode = nme.display.StageScaleMode.NO_SCALE;
@@ -69,8 +69,8 @@ class ApplicationMain
 					#end
 				}
 			},
-			640, 480, 
-			30, 
+			800, 550, 
+			60, 
 			3355443,
 			(true ? nme.Lib.HARDWARE : 0) |
 			(false ? nme.Lib.ALLOW_SHADERS : 0) |
