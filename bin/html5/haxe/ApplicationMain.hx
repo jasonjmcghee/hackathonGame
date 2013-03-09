@@ -98,12 +98,6 @@ class ApplicationMain {
 		
 		
 		
-		var urlLoader:URLLoader = new URLLoader ();
-		urlLoader.dataFormat = TEXT;
-		urlLoaders.set ("atlas/tilemap.xml", urlLoader);
-		total ++;
-		
-		
 		if (total == 0) {
 			
 			begin ();
@@ -220,12 +214,6 @@ class ApplicationMain {
 			
 		}
 		
-		if (inName=="atlas/tilemap.xml") {
-			
-			return Assets.getText ("atlas/tilemap.xml");
-			
-		}
-		
 		return null;
 		
    }
@@ -306,8 +294,6 @@ class ApplicationMain {
 
 	
 		class NME_font_5 extends nme.text.Font { }
-	
-
 	
 
 

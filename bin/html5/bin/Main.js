@@ -54,10 +54,6 @@ ApplicationMain.main = function() {
 	var loader10 = new browser.display.Loader();
 	ApplicationMain.loaders.set("gfx/wall.png",loader10);
 	ApplicationMain.total++;
-	var urlLoader = new browser.net.URLLoader();
-	urlLoader.dataFormat = browser.net.URLLoaderDataFormat.TEXT;
-	ApplicationMain.urlLoaders.set("atlas/tilemap.xml",urlLoader);
-	ApplicationMain.total++;
 	if(ApplicationMain.total == 0) ApplicationMain.begin(); else {
 		var $it0 = ApplicationMain.loaders.keys();
 		while( $it0.hasNext() ) {
@@ -69,9 +65,9 @@ ApplicationMain.main = function() {
 		var $it1 = ApplicationMain.urlLoaders.keys();
 		while( $it1.hasNext() ) {
 			var path = $it1.next();
-			var urlLoader1 = ApplicationMain.urlLoaders.get(path);
-			urlLoader1.addEventListener("complete",ApplicationMain.loader_onComplete);
-			urlLoader1.load(new browser.net.URLRequest(path));
+			var urlLoader = ApplicationMain.urlLoaders.get(path);
+			urlLoader.addEventListener("complete",ApplicationMain.loader_onComplete);
+			urlLoader.load(new browser.net.URLRequest(path));
 		}
 	}
 }
@@ -93,7 +89,6 @@ ApplicationMain.getAsset = function(inName) {
 	if(inName == "gfx/floor.png") return nme.installer.Assets.getBitmapData("gfx/floor.png");
 	if(inName == "gfx/wall.png") return nme.installer.Assets.getBitmapData("gfx/wall.png");
 	if(inName == "font/04B_03__.ttf") return nme.installer.Assets.getFont("font/04B_03__.ttf");
-	if(inName == "atlas/tilemap.xml") return nme.installer.Assets.getText("atlas/tilemap.xml");
 	return null;
 }
 ApplicationMain.loader_onComplete = function(event) {
@@ -1034,44 +1029,35 @@ com.haxepunk.World.prototype = $extend(com.haxepunk.Tweener.prototype,{
 });
 var GameWorld = function() {
 	com.haxepunk.World.call(this);
-	this.atlas = com.haxepunk.graphics.atlas.TextureAtlas.loadTexturePacker("atlas/tilemap.xml");
 };
 $hxClasses["GameWorld"] = GameWorld;
 GameWorld.__name__ = ["GameWorld"];
 GameWorld.__super__ = com.haxepunk.World;
 GameWorld.prototype = $extend(com.haxepunk.World.prototype,{
-	update: function() {
-		com.haxepunk.World.prototype.update.call(this);
-		com.haxepunk.HXP.camera.x = this.hero.x - com.haxepunk.HXP.halfWidth;
-		com.haxepunk.HXP.camera.y = this.hero.y - com.haxepunk.HXP.halfHeight;
-	}
-	,begin: function() {
+	begin: function() {
 		this.hero = new entities.Hero(30,50);
 		this.add(this.hero);
-		var mapWidth = GameWorld.map[0].length;
-		var mapHeight = GameWorld.map.length;
-		var tilemap = new com.haxepunk.graphics.Tilemap("gfx/floor.png",mapWidth * 32,mapHeight * 32,32,32);
-		var grid = new com.haxepunk.masks.Grid(tilemap.getColumns() * tilemap.getTileWidth(),tilemap.getRows() * tilemap.getTileHeight(),tilemap.getTileWidth(),tilemap.getTileHeight());
-		var _g1 = 0, _g = tilemap.getColumns();
-		while(_g1 < _g) {
-			var i = _g1++;
-			var _g3 = 0, _g2 = tilemap.getRows();
-			while(_g3 < _g2) {
-				var j = _g3++;
-				var tile = GameWorld.map[j][i];
-				if(tile != 0) {
-					tilemap.setTile(i,j,tile);
-					grid.setTile(i,j,true);
-				}
-			}
+		var _g = 0;
+		while(_g < 20) {
+			var i = _g++;
+			this.add(new entities.Wall(i,0));
+			this.add(new entities.Wall(i,14));
 		}
-		var entity = new com.haxepunk.Entity();
-		entity.setGraphic(tilemap);
-		entity.setMask(grid);
-		entity.setType("solid");
-		this.add(entity);
+		var _g = 0;
+		while(_g < 14) {
+			var i = _g++;
+			this.add(new entities.Wall(0,i));
+			this.add(new entities.Wall(19,i));
+		}
+		var _g = 1;
+		while(_g < 5) {
+			var i = _g++;
+			this.add(new entities.Wall(5 - i,14 - i));
+			this.add(new entities.Wall(8 + i,5 + i));
+			this.add(new entities.Wall(2 + i,10 - i));
+			this.add(new entities.Wall(13 + i,8 - i));
+		}
 	}
-	,atlas: null
 	,hero: null
 	,__class__: GameWorld
 });
@@ -14328,17 +14314,68 @@ var entities = {}
 entities.Hero = function(x,y) {
 	com.haxepunk.Entity.call(this,x,y);
 	this.setGraphic(new com.haxepunk.graphics.Image("gfx/block.png"));
+	{
+		this.width = 32;
+		this.height = 32;
+		this.originX = 0;
+		this.originY = 0;
+	}
 };
 $hxClasses["entities.Hero"] = entities.Hero;
 entities.Hero.__name__ = ["entities","Hero"];
 entities.Hero.__super__ = com.haxepunk.Entity;
 entities.Hero.prototype = $extend(com.haxepunk.Entity.prototype,{
-	update: function() {
-		if(com.haxepunk.utils.Input.check(38)) this.moveBy(0,-2); else if(com.haxepunk.utils.Input.check(40)) this.moveBy(0,2);
-		if(com.haxepunk.utils.Input.check(37)) this.moveBy(-2,0); else if(com.haxepunk.utils.Input.check(39)) this.moveBy(2,0);
+	move: function() {
+		this.xVel += this.xAccel * 3;
+		this.yVel += this.yAccel * 3;
+		var pab = Math.sqrt(Math.pow(this.xVel,2) + Math.pow(this.yVel,2));
+		if(this.xVel != 0 && this.yVel != 0) {
+			if(pab > 8) {
+				this.xVel = 8 * (this.xVel / pab);
+				this.yVel = 8 * (this.yVel / pab);
+			}
+		} else if(this.xVel == 0 && Math.abs(this.yVel) > 8) this.yVel = 8 * com.haxepunk.HXP.sign(this.yVel); else if(this.yVel == 0 && Math.abs(this.xVel) > 8) this.xVel = 8 * com.haxepunk.HXP.sign(this.xVel);
+		if(this.xVel < 0) this.xVel = Math.min(this.xVel + 0.4,0); else if(this.xVel > 0) this.xVel = Math.max(this.xVel - 0.4,0);
+		if(this.yVel < 0) this.yVel = Math.min(this.yVel + 0.4,0); else if(this.yVel > 0) this.yVel = Math.max(this.yVel - 0.4,0);
+		this.moveBy(this.xVel,this.yVel);
+	}
+	,update: function() {
+		this.handleInput();
+		this.move();
 		com.haxepunk.Entity.prototype.update.call(this);
 	}
+	,handleInput: function() {
+		this.xAccel = 0;
+		this.yAccel = 0;
+		if(com.haxepunk.utils.Input.check(87)) this.yAccel = -1;
+		if(com.haxepunk.utils.Input.check(65)) this.xAccel = -1;
+		if(com.haxepunk.utils.Input.check(83)) this.yAccel = 1;
+		if(com.haxepunk.utils.Input.check(68)) this.xAccel = 1;
+	}
+	,yAccel: null
+	,xAccel: null
+	,yVel: null
+	,xVel: null
 	,__class__: entities.Hero
+});
+entities.Wall = function(posX,posY) {
+	com.haxepunk.Entity.call(this,posX,posY);
+	this.setGraphic(new com.haxepunk.graphics.Image("gfx/wall.png"));
+	{
+		this.width = 32;
+		this.height = 32;
+		this.originX = 0;
+		this.originY = 0;
+	}
+	this.setType("wall");
+	this.x = posX * 32;
+	this.y = posY * 32;
+};
+$hxClasses["entities.Wall"] = entities.Wall;
+entities.Wall.__name__ = ["entities","Wall"];
+entities.Wall.__super__ = com.haxepunk.Entity;
+entities.Wall.prototype = $extend(com.haxepunk.Entity.prototype,{
+	__class__: entities.Wall
 });
 var format = {}
 format.display = {}
@@ -16312,8 +16349,6 @@ nme.installer.Assets.initialize = function() {
 		nme.installer.Assets.resourceClasses.set("font/04B_03__.ttf",NME_font_5);
 		nme.installer.Assets.resourceNames.set("font/04B_03__.ttf","font/04B_03__.ttf");
 		nme.installer.Assets.resourceTypes.set("font/04B_03__.ttf","font");
-		nme.installer.Assets.resourceNames.set("atlas/tilemap.xml","atlas/tilemap.xml");
-		nme.installer.Assets.resourceTypes.set("atlas/tilemap.xml","text");
 		nme.installer.Assets.initialized = true;
 	}
 }
@@ -16330,14 +16365,14 @@ nme.installer.Assets.getBitmapData = function(id,useCache) {
 		var libraryName = HxOverrides.substr(id,0,id.indexOf(":"));
 		var symbolName = HxOverrides.substr(id,id.indexOf(":") + 1,null);
 		if(nme.installer.Assets.libraryTypes.exists(libraryName)) {
-		} else haxe.Log.trace("[nme.Assets] There is no asset library named \"" + libraryName + "\"",{ fileName : "Assets.hx", lineNumber : 181, className : "nme.installer.Assets", methodName : "getBitmapData"});
-	} else haxe.Log.trace("[nme.Assets] There is no BitmapData asset with an ID of \"" + id + "\"",{ fileName : "Assets.hx", lineNumber : 187, className : "nme.installer.Assets", methodName : "getBitmapData"});
+		} else haxe.Log.trace("[nme.Assets] There is no asset library named \"" + libraryName + "\"",{ fileName : "Assets.hx", lineNumber : 177, className : "nme.installer.Assets", methodName : "getBitmapData"});
+	} else haxe.Log.trace("[nme.Assets] There is no BitmapData asset with an ID of \"" + id + "\"",{ fileName : "Assets.hx", lineNumber : 183, className : "nme.installer.Assets", methodName : "getBitmapData"});
 	return null;
 }
 nme.installer.Assets.getBytes = function(id) {
 	nme.installer.Assets.initialize();
 	if(nme.installer.Assets.resourceNames.exists(id)) return ApplicationMain.urlLoaders.get(nme.installer.Assets.getResourceName(id)).data;
-	haxe.Log.trace("[nme.Assets] There is no String or ByteArray asset with an ID of \"" + id + "\"",{ fileName : "Assets.hx", lineNumber : 206, className : "nme.installer.Assets", methodName : "getBytes"});
+	haxe.Log.trace("[nme.Assets] There is no String or ByteArray asset with an ID of \"" + id + "\"",{ fileName : "Assets.hx", lineNumber : 202, className : "nme.installer.Assets", methodName : "getBytes"});
 	return null;
 }
 nme.installer.Assets.getFont = function(id) {
@@ -16345,7 +16380,7 @@ nme.installer.Assets.getFont = function(id) {
 	if(nme.installer.Assets.resourceNames.exists(id) && nme.installer.Assets.resourceTypes.exists(id)) {
 		if(nme.installer.Assets.resourceTypes.get(id).toLowerCase() == "font") return js.Boot.__cast(Type.createInstance(nme.installer.Assets.resourceClasses.get(id),[]) , browser.text.Font);
 	}
-	haxe.Log.trace("[nme.Assets] There is no Font asset with an ID of \"" + id + "\"",{ fileName : "Assets.hx", lineNumber : 227, className : "nme.installer.Assets", methodName : "getFont"});
+	haxe.Log.trace("[nme.Assets] There is no Font asset with an ID of \"" + id + "\"",{ fileName : "Assets.hx", lineNumber : 223, className : "nme.installer.Assets", methodName : "getFont"});
 	return null;
 }
 nme.installer.Assets.getMovieClip = function(id) {
@@ -16353,7 +16388,7 @@ nme.installer.Assets.getMovieClip = function(id) {
 	var libraryName = HxOverrides.substr(id,0,id.indexOf(":"));
 	var symbolName = HxOverrides.substr(id,id.indexOf(":") + 1,null);
 	if(nme.installer.Assets.libraryTypes.exists(libraryName)) {
-	} else haxe.Log.trace("[nme.Assets] There is no asset library named \"" + libraryName + "\"",{ fileName : "Assets.hx", lineNumber : 279, className : "nme.installer.Assets", methodName : "getMovieClip"});
+	} else haxe.Log.trace("[nme.Assets] There is no asset library named \"" + libraryName + "\"",{ fileName : "Assets.hx", lineNumber : 275, className : "nme.installer.Assets", methodName : "getMovieClip"});
 	return null;
 }
 nme.installer.Assets.getResourceName = function(id) {
@@ -16365,7 +16400,7 @@ nme.installer.Assets.getSound = function(id) {
 	if(nme.installer.Assets.resourceNames.exists(id) && nme.installer.Assets.resourceTypes.exists(id)) {
 		if(nme.installer.Assets.resourceTypes.get(id).toLowerCase() == "sound") return new browser.media.Sound(new browser.net.URLRequest(nme.installer.Assets.resourceNames.get(id))); else if(nme.installer.Assets.resourceTypes.get(id).toLowerCase() == "music") return new browser.media.Sound(new browser.net.URLRequest(nme.installer.Assets.resourceNames.get(id)));
 	}
-	haxe.Log.trace("[nme.Assets] There is no Sound asset with an ID of \"" + id + "\"",{ fileName : "Assets.hx", lineNumber : 315, className : "nme.installer.Assets", methodName : "getSound"});
+	haxe.Log.trace("[nme.Assets] There is no Sound asset with an ID of \"" + id + "\"",{ fileName : "Assets.hx", lineNumber : 311, className : "nme.installer.Assets", methodName : "getSound"});
 	return null;
 }
 nme.installer.Assets.getText = function(id) {
@@ -16440,7 +16475,6 @@ browser.text.Font.DEFAULT_FONT_DATA = "q:55oy6:ascentd950.5y4:dataad84d277.5d564
 browser.text.Font.DEFAULT_FONT_SCALE = 9.0;
 browser.text.Font.DEFAULT_FONT_NAME = "Bitstream_Vera_Sans";
 browser.text.Font.DEFAULT_CLASS_NAME = "browser.text.Font";
-GameWorld.map = [[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,0,0,0,1,1,1,1,1,1,0,0,0,1,1,1,1,1],[1,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,1,0,1,1],[1,1,0,0,0,1,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,1],[1,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,1,1],[1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1],[1,1,0,0,1,0,0,0,0,0,0,0,1,1,1,1,1,1,0,1,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1],[1,0,0,0,0,0,1,1,0,0,0,0,0,1,0,0,1,0,0,0,0,1],[1,1,1,1,1,1,1,1,1,1,0,0,1,1,0,0,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,0,0,0,0,0,0,1],[1,1,1,1,1,1,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]];
 browser.display.DisplayObject.GRAPHICS_INVALID = 2;
 browser.display.DisplayObject.MATRIX_INVALID = 4;
 browser.display.DisplayObject.MATRIX_CHAIN_INVALID = 8;
@@ -16987,6 +17021,9 @@ com.haxepunk.utils.Key.NUMPAD_DIVIDE = 111;
 com.haxepunk.utils.Key.NUMPAD_ENTER = 108;
 com.haxepunk.utils.Key.NUMPAD_MULTIPLY = 106;
 com.haxepunk.utils.Key.NUMPAD_SUBTRACT = 109;
+entities.Hero.maxVelocity = 8;
+entities.Hero.speed = 3;
+entities.Hero.drag = 0.4;
 haxe.Template.splitter = new EReg("(::[A-Za-z0-9_ ()&|!+=/><*.\"-]+::|\\$\\$([A-Za-z0-9_-]+)\\()","");
 haxe.Template.expr_splitter = new EReg("(\\(|\\)|[ \r\n\t]*\"[^\"]*\"[ \r\n\t]*|[!+=/><*.&|-]+)","");
 haxe.Template.expr_trim = new EReg("^[ ]*([^ ]+)[ ]*$","");

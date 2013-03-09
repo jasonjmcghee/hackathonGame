@@ -67,8 +67,6 @@ class Assets {
 			resourceTypes.set ("gfx/wall.png", "image");
 			resourceClasses.set ("font/04B_03__.ttf", NME_font_5);
 			resourceTypes.set ("font/04B_03__.ttf", "font");
-			resourceClasses.set ("atlas/tiles.xml", NME_atlas_tiles_xml);
-			resourceTypes.set ("atlas/tiles.xml", "text");
 			
 			
 			initialized = true;
