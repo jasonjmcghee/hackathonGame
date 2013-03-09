@@ -6,18 +6,11 @@ import com.haxepunk.utils.Input;
 import com.haxepunk.utils.Key;
 import com.haxepunk.HXP;
 import entities.Wall;
+import GameWorld;
 
 class Hero extends Entity {
   
-  private var xVel:Float;
-  private var yVel:Float;
-  private var xAccel:Float;
-  private var yAccel:Float;
-  private static inline var maxVelocity:Float = 12;
-  private static inline var speed:Float = 3;
-  private static inline var drag:Float = 0.4;
-
-  public function new(posX:Int, posY:Int) {
+    public function new(posX:Int, posY:Int) {
     super(posX, posY);
     graphic = new Image("gfx/block.png");
     setHitbox(32, 32);
@@ -45,8 +38,8 @@ class Hero extends Entity {
       }
       move();
 
-      if (collide("blob", x, y)) {
-        
+      if (collide("blob", x, y) != null) {
+        isDead = true;
       }
   }
 
@@ -76,4 +69,18 @@ class Hero extends Entity {
     }
     moveBy(xVel, yVel);
   }
+
+  public function isAlive():Bool {
+    return !isDead;
+  }
+
+  private var xVel:Float;
+  private var yVel:Float;
+  private var xAccel:Float;
+  private var yAccel:Float;
+  private static inline var maxVelocity:Float = 12;
+  private static inline var speed:Float = 3;
+  private static inline var drag:Float = 0.4;
+  private var isDead:Bool = false;
+
 }

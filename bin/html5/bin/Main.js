@@ -1028,33 +1028,72 @@ com.haxepunk.World.prototype = $extend(com.haxepunk.Tweener.prototype,{
 	,__properties__: $extend(com.haxepunk.Tweener.prototype.__properties__,{get_mouseX:"getMouseX",get_mouseY:"getMouseY",get_count:"getCount",get_first:"getFirst",get_layers:"getLayers",get_farthest:"getFarthest",get_nearest:"getNearest",get_layerFarthest:"getLayerFarthest",get_layerNearest:"getLayerNearest",get_uniqueTypes:"getUniqueTypes"})
 });
 var GameWorld = function() {
+	this.isGameOver = false;
+	this.worldHeight = 28;
+	this.worldWidth = 40;
 	com.haxepunk.World.call(this);
 };
 $hxClasses["GameWorld"] = GameWorld;
 GameWorld.__name__ = ["GameWorld"];
 GameWorld.__super__ = com.haxepunk.World;
 GameWorld.prototype = $extend(com.haxepunk.World.prototype,{
-	hero: null
+	isGameOver: null
+	,worldHeight: null
+	,worldWidth: null
+	,blob: null
+	,hero: null
+	,timer: null
+	,gameOver: function() {
+		this.isGameOver = true;
+	}
 	,update: function() {
-		com.haxepunk.HXP.camera.x = this.hero.x - com.haxepunk.HXP.halfWidth;
-		com.haxepunk.HXP.camera.y = this.hero.y - com.haxepunk.HXP.halfHeight;
+		if(this.timer.getTime() > 5 && this.hero.isAlive()) {
+			com.haxepunk.HXP.camera.x = this.hero.x - com.haxepunk.HXP.halfWidth;
+			com.haxepunk.HXP.camera.y = this.hero.y - com.haxepunk.HXP.halfHeight;
+			if(com.haxepunk.HXP.camera.x < 0) com.haxepunk.HXP.camera.x = 0;
+			if(com.haxepunk.HXP.camera.y < 0) com.haxepunk.HXP.camera.y = 0;
+			if(com.haxepunk.HXP.camera.x > this.worldWidth * 32 - com.haxepunk.HXP.width) com.haxepunk.HXP.camera.x = this.worldWidth * 32 - com.haxepunk.HXP.width;
+			if(com.haxepunk.HXP.camera.y > this.worldHeight * 32 - com.haxepunk.HXP.height + 32) com.haxepunk.HXP.camera.y = this.worldHeight * 32 - com.haxepunk.HXP.height + 32;
+		} else this.gameOver();
 		com.haxepunk.World.prototype.update.call(this);
 	}
 	,begin: function() {
+		var _g1 = 0, _g = this.worldWidth;
+		while(_g1 < _g) {
+			var i = _g1++;
+			this.add(new entities.Wall(i,0));
+			this.add(new entities.Wall(i,this.worldHeight));
+		}
+		var _g1 = 0, _g = this.worldHeight;
+		while(_g1 < _g) {
+			var i = _g1++;
+			this.add(new entities.Wall(0,i));
+			this.add(new entities.Wall(this.worldWidth - 1,i));
+		}
+		var _g1 = 0, _g = this.worldWidth;
+		while(_g1 < _g) {
+			var i = _g1++;
+			var _g3 = 0, _g2 = this.worldHeight;
+			while(_g3 < _g2) {
+				var j = _g3++;
+				if(Math.random() < 0.05) {
+					this.add(new entities.Wall(i,j));
+					if(Math.random() < 0.1) {
+						this.add(new entities.Wall(i,j));
+						if(Math.random() < 0.1) this.add(new entities.Wall(i,j));
+					}
+				}
+			}
+		}
 		this.hero = new entities.Hero(50,50);
 		this.add(this.hero);
 		var _g = 0;
-		while(_g < 40) {
+		while(_g < 10) {
 			var i = _g++;
-			this.add(new entities.Wall(i,0));
-			this.add(new entities.Wall(i,28));
+			this.add(new entities.Blob(400,250,this.hero));
 		}
-		var _g = 0;
-		while(_g < 28) {
-			var i = _g++;
-			this.add(new entities.Wall(0,i));
-			this.add(new entities.Wall(39,i));
-		}
+		this.timer = new entities.Timer();
+		this.add(this.timer);
 	}
 	,__class__: GameWorld
 });
@@ -14401,6 +14440,81 @@ com.haxepunk.utils.Key.nameOfKey = function($char) {
 	return String.fromCharCode($char);
 }
 var entities = {}
+entities.Blob = function(posX,posY,hero) {
+	this.drag = 0.4;
+	this.speed = 3;
+	this.maxVelocity = 8;
+	com.haxepunk.Entity.call(this,posX,posY);
+	this.setGraphic(new com.haxepunk.graphics.Image("gfx/block.png"));
+	{
+		this.width = 32;
+		this.height = 32;
+		this.originX = 0;
+		this.originY = 0;
+	}
+	this.enemy = hero;
+	this.setType("blob");
+	var seed = Math.random();
+	if(seed < 0.75) seed += 0.5;
+	this.maxVelocity *= seed;
+	this.speed *= seed * 2;
+	this.drag *= seed / 2;
+};
+$hxClasses["entities.Blob"] = entities.Blob;
+entities.Blob.__name__ = ["entities","Blob"];
+entities.Blob.__super__ = com.haxepunk.Entity;
+entities.Blob.prototype = $extend(com.haxepunk.Entity.prototype,{
+	getMoveDist: function() {
+		return Math.sqrt(Math.pow(this.xVel,2) + Math.pow(this.yVel,2));
+	}
+	,move: function() {
+		this.xVel += this.xAccel * this.speed;
+		this.yVel += this.yAccel * this.speed;
+		var pab = Math.sqrt(Math.pow(this.xVel,2) + Math.pow(this.yVel,2));
+		var normalized = this.maxVelocity / pab;
+		if(pab > this.maxVelocity) {
+			this.xVel *= normalized;
+			this.yVel *= normalized;
+		}
+		if(this.xVel < 0) this.xVel = Math.min(this.xVel + this.drag,0); else if(this.xVel > 0) this.xVel = Math.max(this.xVel - this.drag,0);
+		if(this.yVel < 0) this.yVel = Math.min(this.yVel + this.drag,0); else if(this.yVel > 0) this.yVel = Math.max(this.yVel - this.drag,0);
+		this.moveBy(this.xVel,this.yVel);
+	}
+	,update: function() {
+		com.haxepunk.Entity.prototype.update.call(this);
+		this.handleInput();
+		if(this.collide("wall",this.x + com.haxepunk.HXP.sign(this.xVel) * 2,this.y + com.haxepunk.HXP.sign(this.yVel) * 4) != null) {
+			this.x -= com.haxepunk.HXP.sign(this.xVel);
+			this.y -= com.haxepunk.HXP.sign(this.yVel);
+			this.xVel *= -1;
+			this.yVel *= -1;
+		}
+		this.move();
+	}
+	,handleInput: function() {
+		this.xAccel = 0;
+		this.yAccel = 0;
+		if(com.haxepunk.utils.Input.mouseDown) {
+			if((com.haxepunk.HXP.screen.getMouseY() + com.haxepunk.HXP.camera.y | 0) > this.y) this.yAccel = 1;
+			if((com.haxepunk.HXP.screen.getMouseX() + com.haxepunk.HXP.camera.x | 0) > this.x) this.xAccel = 1;
+			if((com.haxepunk.HXP.screen.getMouseY() + com.haxepunk.HXP.camera.y | 0) < this.y) this.yAccel = -1;
+			if((com.haxepunk.HXP.screen.getMouseX() + com.haxepunk.HXP.camera.x | 0) < this.x) this.xAccel = -1;
+		}
+		if(this.enemy.y > this.y) this.yAccel = 1;
+		if(this.enemy.x > this.x) this.xAccel = 1;
+		if(this.enemy.y < this.y) this.yAccel = -1;
+		if(this.enemy.x < this.x) this.xAccel = -1;
+	}
+	,enemy: null
+	,drag: null
+	,speed: null
+	,maxVelocity: null
+	,yAccel: null
+	,xAccel: null
+	,yVel: null
+	,xVel: null
+	,__class__: entities.Blob
+});
 entities.Floor = function() {
 	com.haxepunk.Entity.call(this);
 	var _tiles = new com.haxepunk.graphics.Tilemap("gfx/tileset.png",64,32,32,32);
@@ -14418,6 +14532,7 @@ entities.Floor.prototype = $extend(com.haxepunk.Entity.prototype,{
 	__class__: entities.Floor
 });
 entities.Hero = function(posX,posY) {
+	this.isDead = false;
 	com.haxepunk.Entity.call(this,posX,posY);
 	this.setGraphic(new com.haxepunk.graphics.Image("gfx/block.png"));
 	{
@@ -14431,12 +14546,20 @@ $hxClasses["entities.Hero"] = entities.Hero;
 entities.Hero.__name__ = ["entities","Hero"];
 entities.Hero.__super__ = com.haxepunk.Entity;
 entities.Hero.prototype = $extend(com.haxepunk.Entity.prototype,{
-	move: function() {
-		this.xVel += this.xAccel * 4;
-		this.yVel += this.yAccel * 4;
+	isDead: null
+	,yAccel: null
+	,xAccel: null
+	,yVel: null
+	,xVel: null
+	,isAlive: function() {
+		return !this.isDead;
+	}
+	,move: function() {
+		this.xVel += this.xAccel * 3;
+		this.yVel += this.yAccel * 3;
 		var pab = Math.sqrt(Math.pow(this.xVel,2) + Math.pow(this.yVel,2));
-		var normalized = 10 / pab;
-		if(pab > 10) {
+		var normalized = 12 / pab;
+		if(pab > 12) {
 			this.xVel *= normalized;
 			this.yVel *= normalized;
 		}
@@ -14454,6 +14577,7 @@ entities.Hero.prototype = $extend(com.haxepunk.Entity.prototype,{
 			this.yVel *= -1;
 		}
 		this.move();
+		if(this.collide("blob",this.x,this.y) != null) this.isDead = true;
 	}
 	,handleInput: function() {
 		this.xAccel = 0;
@@ -14463,11 +14587,26 @@ entities.Hero.prototype = $extend(com.haxepunk.Entity.prototype,{
 		if(com.haxepunk.utils.Input.check(83)) this.yAccel = 1;
 		if(com.haxepunk.utils.Input.check(68)) this.xAccel = 1;
 	}
-	,yAccel: null
-	,xAccel: null
-	,yVel: null
-	,xVel: null
 	,__class__: entities.Hero
+});
+entities.Timer = function() {
+	com.haxepunk.Entity.call(this);
+	this.time = 0;
+	this.setGraphic(new com.haxepunk.graphics.Text("Time Alive: " + this.time + " seconds"));
+};
+$hxClasses["entities.Timer"] = entities.Timer;
+entities.Timer.__name__ = ["entities","Timer"];
+entities.Timer.__super__ = com.haxepunk.Entity;
+entities.Timer.prototype = $extend(com.haxepunk.Entity.prototype,{
+	getTime: function() {
+		return this.time;
+	}
+	,update: function() {
+		com.haxepunk.Entity.prototype.update.call(this);
+		this.time = Math.floor(com.haxepunk.HXP.timeFlag() * 1000.0);
+	}
+	,time: null
+	,__class__: entities.Timer
 });
 entities.Wall = function(posX,posY) {
 	com.haxepunk.Entity.call(this,posX,posY);
@@ -17132,8 +17271,8 @@ com.haxepunk.utils.Key.NUMPAD_DIVIDE = 111;
 com.haxepunk.utils.Key.NUMPAD_ENTER = 108;
 com.haxepunk.utils.Key.NUMPAD_MULTIPLY = 106;
 com.haxepunk.utils.Key.NUMPAD_SUBTRACT = 109;
-entities.Hero.maxVelocity = 10;
-entities.Hero.speed = 4;
+entities.Hero.maxVelocity = 12;
+entities.Hero.speed = 3;
 entities.Hero.drag = 0.4;
 haxe.Template.splitter = new EReg("(::[A-Za-z0-9_ ()&|!+=/><*.\"-]+::|\\$\\$([A-Za-z0-9_-]+)\\()","");
 haxe.Template.expr_splitter = new EReg("(\\(|\\)|[ \r\n\t]*\"[^\"]*\"[ \r\n\t]*|[!+=/><*.&|-]+)","");

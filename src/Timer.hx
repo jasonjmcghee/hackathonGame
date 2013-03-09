@@ -18,6 +18,10 @@ class Timer extends Entity {
   public override function update() {
     
     super.update();
-    time += HXP.elapsed;
+    time = Math.floor(HXP.timeFlag()*1000.0);
+  }
+
+  public function getTime():Int {
+    return time;
   }
 }

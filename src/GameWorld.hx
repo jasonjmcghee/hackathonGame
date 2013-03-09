@@ -14,7 +14,6 @@ import entities.Timer;
 class GameWorld extends World {
 
   public function new() {
-    //HXP.world.screen.color(0x332222);
     super();
   }
 
@@ -78,17 +77,21 @@ class GameWorld extends World {
 
   public override function update() {
 
-    HXP.camera.x = hero.x - HXP.halfWidth;
-    HXP.camera.y = hero.y - HXP.halfHeight;
-    if (HXP.camera.x < 0) HXP.camera.x = 0;
-    if (HXP.camera.y < 0) HXP.camera.y = 0;
-    //if (hero.x < 0 + HXP.halfWidth) HXP.camera.x = 0;
-    //if (hero.y < 0 + HXP.halfHeight) HXP.camera.y = 0;
-    if (HXP.camera.x > worldWidth*32 - HXP.width) HXP.camera.x = worldWidth*32 - HXP.width;
-    if (HXP.camera.y > worldHeight*32 - HXP.height + 32) HXP.camera.y = worldHeight*32 - HXP.height + 32;
-    //if (hero.x > HXP.screen.width - HXP.halfWidth) HXP.camera.x = HXP.screen.width - HXP.width;
-    //if (hero.y > HXP.screen.height - HXP.halfHeight) HXP.camera.y = HXP.screen.height - HXP.height;
+    if (timer.getTime() > 5 && hero.isAlive()) {
+      HXP.camera.x = hero.x - HXP.halfWidth;
+      HXP.camera.y = hero.y - HXP.halfHeight;
+      if (HXP.camera.x < 0) HXP.camera.x = 0;
+      if (HXP.camera.y < 0) HXP.camera.y = 0;
+      if (HXP.camera.x > worldWidth*32 - HXP.width) HXP.camera.x = worldWidth*32 - HXP.width;
+      if (HXP.camera.y > worldHeight*32 - HXP.height + 32) HXP.camera.y = worldHeight*32 - HXP.height + 32;
+    } else {
+      gameOver();
+    }
     super.update();
+  }
+
+  public function gameOver() {
+    isGameOver = true;
   }
 
   private var timer:Timer;
@@ -96,4 +99,5 @@ class GameWorld extends World {
   private var blob:Blob;
   private var worldWidth:Int = 40;
   private var worldHeight:Int = 28;
+  private var isGameOver:Bool = false;
 }

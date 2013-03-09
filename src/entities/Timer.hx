@@ -10,6 +10,7 @@ class Timer extends Entity {
 
   public function new() {
 
+    super();
     time = 0;
     graphic = new Text('Time Alive: ' + time + ' seconds');
   }
@@ -17,6 +18,10 @@ class Timer extends Entity {
   public override function update() {
     
     super.update();
-    time += HXP.elapsed;
+    time = Math.floor(HXP.timeFlag()*1000.0);
+  }
+
+  public function getTime():Int {
+    return time;
   }
 }
